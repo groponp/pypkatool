@@ -4,7 +4,7 @@
 This module drives `PyPKA <https://doi.org/10.1021/acs.jcim.0c00718>`_
 (Poisson-Boltzmann + Monte Carlo pKa calculation) on an input structure,
 cross-validates every predicted pKa against the independent machine-learning
-predictor `pKAI+ <https://doi.org/10.1021/acs.jcim.1c00840>`_, maps each
+predictor `pKAI+ <https://doi.org/10.1021/acs.jctc.2c00308>`_, maps each
 titratable site's most probable tautomer onto a CHARMM36 residue/patch label
 (``HSD``/``HSE``/``HSP``, ``ASPP``, ``GLUP``, ``LSN``, ``CNEU``, ``CYSD``,
 ``TYRD``, ``SERD``, ...), and writes a CHARMM-GUI-ready protonation table.
@@ -31,7 +31,7 @@ Usage:
     ``pypkatool reprocess <outdir> --ph <float> [--pdb <pdb>]``
 
 :seealso: PyPKA DOI 10.1021/acs.jcim.0c00718; pKAI/pKAI+ DOI
-    10.1021/acs.jcim.1c00840.
+    10.1021/acs.jctc.2c00308.
 """
 from __future__ import annotations
 

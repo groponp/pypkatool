@@ -4,7 +4,7 @@
 target pH, runs [PyPKA](https://doi.org/10.1021/acs.jcim.0c00718)
 (Poisson-Boltzmann + Monte Carlo pKa calculation), cross-validates every
 predicted pKa against the independent machine-learning predictor
-[pKAI+](https://doi.org/10.1021/acs.jcim.1c00840), and writes a
+[pKAI+](https://doi.org/10.1021/acs.jctc.2c00308), and writes a
 CHARMM-GUI-ready protonation-state table (which `RESI`/`PRES` to pick for
 each titratable residue in PDB Reader).
 
@@ -212,8 +212,8 @@ and is never imported by `pypkatool` itself.
 
 - PyPKA: Reis, P. B. P. S. et al. *J. Chem. Inf. Model.* 2020, 60, 4442-4448.
   [DOI: 10.1021/acs.jcim.0c00718](https://doi.org/10.1021/acs.jcim.0c00718)
-- pKAI / pKAI+: Pires, D. E. V. et al. *J. Chem. Inf. Model.* 2021.
-  [DOI: 10.1021/acs.jcim.1c00840](https://doi.org/10.1021/acs.jcim.1c00840)
+- pKAI / pKAI+: Reis, P. B. P. S. et al. *J. Chem. Theory Comput.* 2022, 18, 3925-3935.
+  [DOI: 10.1021/acs.jctc.2c00308](https://doi.org/10.1021/acs.jctc.2c00308)
 - CHARMM36: Best, R. B.; Zhu, X.; Shim, J.; Lopes, P. E. M.; Mittal, J.;
   Feig, M.; MacKerell, A. D. Jr. *J. Chem. Theory Comput.* 2012, 8 (9),
   3257-3273. [DOI: 10.1021/ct300400x](https://doi.org/10.1021/ct300400x) -

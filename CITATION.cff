@@ -33,13 +33,25 @@ references:
     year: 2020
     doi: 10.1021/acs.jcim.0c00718
   - type: article
-    title: "pKAI: Machine Learning-Based Prediction of pKa Values"
+    title: >-
+      A Fast and Interpretable Deep Learning Approach for Accurate
+      Electrostatics-Driven pKa Predictions in Proteins
     authors:
-      - family-names: Pires
-        given-names: D. E. V.
-    journal: Journal of Chemical Information and Modeling
-    year: 2021
-    doi: 10.1021/acs.jcim.1c00840
+      - family-names: Reis
+        given-names: P. B. P. S.
+      - family-names: Bertolini
+        given-names: M.
+      - family-names: Montanari
+        given-names: F.
+      - family-names: Clevert
+        given-names: D.-A.
+    journal: Journal of Chemical Theory and Computation
+    volume: 18
+    issue: 6
+    start: 3925
+    end: 3935
+    year: 2022
+    doi: 10.1021/acs.jctc.2c00308
   - type: article
     title: >-
       Optimization of the Additive CHARMM All-Atom Protein Force Field
