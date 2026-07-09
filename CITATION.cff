@@ -16,7 +16,7 @@ authors:
     given-names: G.
     affiliation: "Department of Physics, UNESP"
     email: georcki.ropon@unesp.br
-repository-code: "https://github.com/groponp/pypkatool"
+repository-code: "https://github.com/groponp/PyPkaTool"
 license: MIT
 references:
   - type: article

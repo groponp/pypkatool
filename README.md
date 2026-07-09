@@ -318,7 +318,8 @@ No PyPKA rerun is needed to run this suite.
 ├── environment.yml            Main conda environment (Python 3.10 + PyPKA + pKAI)
 ├── environment-py27.yml       Python 2.7 helper environment (PyPKA internal dependency)
 ├── environment-pdbfixer.yml   PDBFixer/OpenMM helper environment (fixstructure command)
-└── pyproject.toml             Package metadata + `pypkatool` console script
+├── pyproject.toml             Package metadata + `pypkatool` console script
+└── CITATION.cff               Citation metadata (GitHub "Cite this repository" button)
 ```
 
 Note the two separate `data/` directories: `pypkatool/data/` ships *inside* the
