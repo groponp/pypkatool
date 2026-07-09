@@ -2,13 +2,13 @@
 #
 # Create it with:
 #   conda env create -f environment.yml
-#   conda activate autopypka
+#   conda activate pypkatool
 #   pip install -e .
 #
 # See README.md "Installation" for the full setup, including the small
 # Python 2.7 helper environment (environment-py27.yml) that PyPKA needs
 # internally for pdb2pqr.
-name: autopypka
+name: pypkatool
 channels:
   - conda-forge
   - defaults

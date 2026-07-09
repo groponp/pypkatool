@@ -33,7 +33,7 @@ bare `python2.7` interpreter internally (via `pdbmender`'s vendored
 ```bash
 # 1. Main environment (Python 3.10 + PyPKA + pKAI)
 conda env create -f environment.yml
-conda activate autopypka
+conda activate pypkatool
 
 # 2. Install pypkatool itself (editable install; gives you the `pypkatool` command)
 pip install -e .
@@ -136,7 +136,7 @@ mechanism for catching such cases (see `crossvalidation_report.dat`).
 ## Tests
 
 ```bash
-conda activate autopypka
+conda activate pypkatool
 python tests/test_pypkatool.py -v
 ```
 

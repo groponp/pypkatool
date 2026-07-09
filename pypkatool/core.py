@@ -1607,6 +1607,8 @@ def _post(mapped_raw: list[SiteResult], prot_pdb: Path, pdb_path: Path,
     try: pypka_ver = importlib.metadata.version("pypka")
     except Exception: pypka_ver = "unknown"
 
+    # "autopypka_" strip: back-compat with output dirs from this tool's predecessor
+    # (AutoPypKa); unrelated to any conda environment name.
     write_dat(mapped, outdir, outdir.name.replace("pypkatools_","").replace("autopypka_","").split("_pH")[0],
               ph, pdb_path, params, pkai_map)
     write_json(mapped, outdir, pdb_path.stem, ph, pdb_path, params, pypka_ver)

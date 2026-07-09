@@ -9,7 +9,7 @@ description = "PyPKA pKa results to CHARMM-GUI protonation states, cross-validat
 readme = "README.md"
 requires-python = ">=3.10,<3.11"
 license = { text = "MIT" }
-authors = [{ name = "PypKaTools contributors" }]
+authors = [{ name = "Ropón-Palacios G." }]
 keywords = ["pKa", "protonation", "CHARMM", "CHARMM-GUI", "PyPKA", "pKAI", "molecular dynamics", "Poisson-Boltzmann"]
 classifiers = [
     "Programming Language :: Python :: 3.10",

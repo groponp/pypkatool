@@ -1,11 +1,18 @@
 cff-version: 1.2.0
 message: >-
-  If you use PypKaTools, please cite this software and, since it is a thin
-  pipeline layer, also cite the two methods it wraps: PyPKA and pKAI/pKAI+.
+  If you use PypKaTools, please cite it using the metadata below. GitHub
+  reads this file automatically and adds a "Cite this repository" button
+  to the repo page (APA/BibTeX export). PypKaTools is a pipeline layer
+  around two external methods, PyPKA and pKAI/pKAI+ — please also cite
+  those two (listed under "references" below) since they are what
+  actually compute the pKa values.
+type: software
 title: PypKaTools
 version: 1.0.0
 date-released: 2026-07-08
-type: software
+authors:
+  - family-names: Ropón-Palacios
+    given-names: G.
 license: MIT
 references:
   - type: article
@@ -22,8 +29,7 @@ references:
     year: 2020
     doi: 10.1021/acs.jcim.0c00718
   - type: article
-    title: >-
-      pKAI: Machine Learning-Based Prediction of pKa Values
+    title: "pKAI: Machine Learning-Based Prediction of pKa Values"
     authors:
       - family-names: Pires
         given-names: D. E. V.
