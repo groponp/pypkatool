@@ -3,9 +3,10 @@ message: >-
   If you use pypkatool, please cite it using the metadata below. GitHub
   reads this file automatically and adds a "Cite this repository" button
   to the repo page (APA/BibTeX export). pypkatool is a pipeline layer
-  around two external methods, PyPKA and pKAI/pKAI+ - please also cite
-  those two (listed under "references" below) since they are what
-  actually compute the pKa values.
+  around external methods, PyPKA, pKAI/pKAI+, and the CHARMM36/CHARMM36m
+  protein force field - please also cite those (listed under "references"
+  below) since they are what actually compute the pKa values and define
+  the protonation-state topology.
 type: software
 title: pypkatool
 version: 1.0.0
@@ -39,3 +40,36 @@ references:
     journal: Journal of Chemical Information and Modeling
     year: 2021
     doi: 10.1021/acs.jcim.1c00840
+  - type: article
+    title: >-
+      Optimization of the Additive CHARMM All-Atom Protein Force Field
+      Targeting Improved Sampling of the Backbone phi, psi and Side-Chain
+      chi1 and chi2 Dihedral Angles
+    authors:
+      - family-names: Best
+        given-names: R. B.
+      - family-names: MacKerell
+        given-names: A. D.
+        name-suffix: Jr.
+    journal: Journal of Chemical Theory and Computation
+    volume: 8
+    issue: 9
+    start: 3257
+    end: 3273
+    year: 2012
+    doi: 10.1021/ct300400x
+  - type: article
+    title: "CHARMM36m: An improved force field for folded and intrinsically disordered proteins"
+    authors:
+      - family-names: Huang
+        given-names: J.
+      - family-names: MacKerell
+        given-names: A. D.
+        name-suffix: Jr.
+    journal: Nature Methods
+    volume: 14
+    issue: 1
+    start: 71
+    end: 73
+    year: 2017
+    doi: 10.1038/nmeth.4067

@@ -214,8 +214,16 @@ and is never imported by `pypkatool` itself.
   [DOI: 10.1021/acs.jcim.0c00718](https://doi.org/10.1021/acs.jcim.0c00718)
 - pKAI / pKAI+: Pires, D. E. V. et al. *J. Chem. Inf. Model.* 2021.
   [DOI: 10.1021/acs.jcim.1c00840](https://doi.org/10.1021/acs.jcim.1c00840)
-- CHARMM36: MacKerell, A. D. et al. - `top_all36_prot.rtf` RESI/PRES blocks
-  for all protonation states used here.
+- CHARMM36: Best, R. B.; Zhu, X.; Shim, J.; Lopes, P. E. M.; Mittal, J.;
+  Feig, M.; MacKerell, A. D. Jr. *J. Chem. Theory Comput.* 2012, 8 (9),
+  3257-3273. [DOI: 10.1021/ct300400x](https://doi.org/10.1021/ct300400x) -
+  source of `top_all36_prot.rtf`'s RESI/PRES blocks for all protonation
+  states used here.
+- CHARMM36m: Huang, J.; Rauscher, S.; Nawrocki, G.; Ran, T.; Feig, M.;
+  de Groot, B. L.; Grubmüller, H.; MacKerell, A. D. Jr. *Nat. Methods* 2017,
+  14 (1), 71-73. [DOI: 10.1038/nmeth.4067](https://doi.org/10.1038/nmeth.4067) -
+  the specific, more current CHARMM36 revision PyPKA's tautomer library
+  (`CHARMM36m/sts/`) is built on.
 
 ## Author
 
