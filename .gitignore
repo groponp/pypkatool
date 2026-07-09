@@ -20,6 +20,9 @@ venv/
 /pypkatools_*/
 **/pypkatools_*/
 
+# Sphinx docs build output (built from docs/, not source)
+docs/_build/
+
 # Editor / OS cruft
 .DS_Store
 *.swp

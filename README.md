@@ -8,6 +8,11 @@ predicted pKa against the independent machine-learning predictor
 CHARMM-GUI-ready protonation-state table (which `RESI`/`PRES` to pick for
 each titratable residue in PDB Reader).
 
+Full documentation (installation, usage, force field parameters, tautomer
+mapping, `fixstructure`, API reference) lives in [`docs/`](docs/), built with
+Sphinx - see ["Building the docs"](#building-the-docs) below. This README is
+a quickstart summary of the same content.
+
 Output per run:
 
 | File | Contents |
@@ -294,6 +299,23 @@ cross-validation machinery (`reconcile_his_from_pdb`,
 `reconcile_non_his_from_pdb`, `_validate_label_chain`) actually catches them.
 No PyPKA rerun is needed to run this suite.
 
+## Building the docs
+
+The full documentation site (`docs/`) is built with [Sphinx](https://www.sphinx-doc.org/)
+and does **not** require the `pypkatool`/`py27`/`pdbfixer` conda environments -
+only a plain Python 3.10+ environment:
+
+```bash
+python -m venv .docs-venv && source .docs-venv/bin/activate   # or any Python 3.10+ env
+pip install -r docs/requirements.txt
+sphinx-build -b html docs docs/_build
+# open docs/_build/index.html
+```
+
+The API reference page uses `sphinx.ext.autodoc` on `pypkatool/core.py`'s
+docstrings; `docs/conf.py` stubs out the `pkai` import-time check
+(`_require_pkai()`) so this works without installing PyPKA/pKAI themselves.
+
 ## Repository layout
 
 ```
@@ -315,11 +337,18 @@ No PyPKA rerun is needed to run this suite.
 │                               one directory per benchmark protein/pH)
 ├── examples/
 │   └── denv2.pdb               Example input for a quick first run
+├── docs/                      Sphinx documentation source (see "Building the docs")
+│   ├── conf.py
+│   ├── index.md                Landing page + toctree
+│   ├── requirements.txt        Doc-build-only deps (independent of environment.yml)
+│   └── ...                     installation/usage/force_field/tautomer_mapping/
+│                               fixstructure/failure_modes/validation/api/citation/changelog
 ├── environment.yml            Main conda environment (Python 3.10 + PyPKA + pKAI)
 ├── environment-py27.yml       Python 2.7 helper environment (PyPKA internal dependency)
 ├── environment-pdbfixer.yml   PDBFixer/OpenMM helper environment (fixstructure command)
 ├── pyproject.toml             Package metadata + `pypkatool` console script
-└── CITATION.cff               Citation metadata (GitHub "Cite this repository" button)
+├── CITATION.cff               Citation metadata (GitHub "Cite this repository" button)
+└── CHANGELOG.md                Notable changes, by version (Keep a Changelog format)
 ```
 
 Note the two separate `data/` directories: `pypkatool/data/` ships *inside* the
@@ -343,6 +372,27 @@ and is never imported by `pypkatool` itself.
   14 (1), 71-73. [DOI: 10.1038/nmeth.4067](https://doi.org/10.1038/nmeth.4067) -
   the specific, more current CHARMM36 revision PyPKA's tautomer library
   (`CHARMM36m/sts/`) is built on.
+
+## How to cite this repository
+
+If you use `pypkatool` in published work, please cite it alongside the
+methods it wraps (PyPKA, pKAI+, CHARMM36/CHARMM36m - see
+["References"](#references) above), since those are what actually compute
+the pKa values and define the protonation-state topology.
+
+Citation metadata for `pypkatool` itself is kept in [`CITATION.cff`](CITATION.cff)
+(GitHub reads this automatically and adds a "Cite this repository" button -
+APA/BibTeX export - to the repo page). Manually:
+
+```bibtex
+@software{ropon_palacios_pypkatool,
+  author  = {Ropón-Palacios, G.},
+  title   = {pypkatool},
+  version = {1.0.0},
+  date    = {2026-07-08},
+  url     = {https://github.com/groponp/PyPkaTool}
+}
+```
 
 ## Author
 

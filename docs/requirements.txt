@@ -1,0 +1,7 @@
+# Documentation build dependencies. Independent of environment.yml - building
+# these docs does NOT require the pypka/pKAI conda environment; a plain
+# Python 3.10+ virtualenv is enough (see docs/conf.py for how the pkai
+# import-time check is stubbed out for autodoc).
+sphinx>=7
+myst-parser>=2
+furo

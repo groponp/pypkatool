@@ -942,13 +942,16 @@ def reconcile_his_from_pdb(mapped: list[MappedResidue], prot_pdb: Path,
     """Override HIS labels using three independent signals.
 
     Signal 1 - residue name field in protonated PDB (set by PyPKA's formatter).
-    Signal 2 - atom inventory: which imidazole N carries H
-                   HD1 present, HE2 absent  → HSD
-                   HE2 present, HD1 absent  → HSE
-                   HD1 + HE2 both present   → HSP
-                   neither                  → UNKNOWN
-    Signal 3 - CHARMM36 RTF ATOM definitions for each HIS label
-                   HSD defines HD1 only; HSE defines HE2 only; HSP defines both.
+
+    Signal 2 - atom inventory: which imidazole N carries H::
+
+        HD1 present, HE2 absent  -> HSD
+        HE2 present, HD1 absent  -> HSE
+        HD1 + HE2 both present   -> HSP
+        neither                  -> UNKNOWN
+
+    Signal 3 - CHARMM36 RTF ATOM definitions for each HIS label: HSD defines
+    HD1 only; HSE defines HE2 only; HSP defines both.
 
     Decision priority: atoms (2) > name (1) > API-derived label.
     RTF (3) validates the final label against the topology; mismatch → ERROR.
@@ -1275,6 +1278,7 @@ def _validate_label_chain(mapped: list[MappedResidue], rtf: dict) -> None:
     """Cross-check each action residue through: PyPKA source → _label() → RTF.
 
     For every titratable site, validates three things in sequence:
+
     1. RTF availability: the label must have a RESI or PRES entry in CHARMM36 RTF.
        If not, CHARMM-GUI cannot apply the action (flagged as NO_PATCH in the table).
     2. Patch indicator consistency: for PRES patches (ASPP, GLUP, LSN, CYSD, SERD), confirm
