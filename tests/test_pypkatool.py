@@ -1539,8 +1539,9 @@ for _cname, _cdir in RESULTS.items():
     _prot_p = _cdir / "protocol.json"
     if _prot_p.exists():
         _prot = _cjson.loads(_prot_p.read_text())
-        check(f"{_cname}: protocol.json tool is 'AutoPypKa' or 'PypKaTools'",
-              _prot.get("tool") in ("AutoPypKa","PypKaTools"),
+        check(f"{_cname}: protocol.json tool is a known tool name across renames "
+              f"(AutoPypKa -> PypKaTools -> pypkatool)",
+              _prot.get("tool") in ("AutoPypKa","PypKaTools","pypkatool"),
               f"got tool={_prot.get('tool')!r}")
         check(f"{_cname}: protocol.json engine='PyPKA'",
               _prot.get("engine") == "PyPKA", f"got {_prot.get('engine')!r}")

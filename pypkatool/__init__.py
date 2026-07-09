@@ -1,4 +1,4 @@
-"""PypKaTools: PyPKA pKa results to CHARMM-GUI protonation states.
+"""pypkatool: PyPKA pKa results to CHARMM-GUI protonation states.
 
 See :mod:`pypkatool.core` for the full pipeline implementation, or run
 ``pypkatool --help`` for CLI usage.

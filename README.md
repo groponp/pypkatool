@@ -1,4 +1,4 @@
-# PypKaTools
+# pypkatool
 
 `pypkatool` is a command-line pipeline that takes a protein structure and a
 target pH, runs [PyPKA](https://doi.org/10.1021/acs.jcim.0c00718)
@@ -84,7 +84,7 @@ pypkatool run examples/denv2.pdb --ph 5.0
 | Flag | Default | Meaning |
 |---|---|---|
 | `--ph` | *(required)* | Target pH for the most-probable-protonation-state report |
-| `--outdir` | `pypkatools_<stem>_pH<ph>/` next to the input PDB | Output directory |
+| `--outdir` | `pypkatool_<stem>_pH<ph>/` next to the input PDB | Output directory |
 | `--ncpus` | all detected CPUs | Parallel PB solves in PyPKA |
 | `--epsin` | `15` | Protein interior dielectric constant (PyPKA's literature-optimized default; RMSE 0.82 / MAE 0.57 on the PKAD benchmark) |
 
@@ -159,19 +159,31 @@ No PyPKA rerun is needed to run this suite.
 ## Repository layout
 
 ```
-pypkatool/           Installable package (CLI + pipeline; see docstrings for API detail)
-  core.py             All pipeline logic: PyPKA runner, tautomer->CHARMM mapping,
-                       PDB/RTF cross-validation, pKAI+ cross-validation, report writers
-  data/               Bundled CHARMM36 protein topology (top_all36_prot.rtf)
-tests/
-  test_pypkatool.py   Unit + regression + adversarial test suite
-  data/               Benchmark input PDBs
-  fixtures/           Frozen reference outputs (regression test fixtures)
-examples/             Example input for a quick first run
-environment.yml           Main conda environment (Python 3.10 + PyPKA + pKAI)
-environment-py27.yml       Python 2.7 helper environment (PyPKA internal dependency)
-pyproject.toml             Package metadata + `pypkatool` console script
+.
+├── pypkatool/                 Installable package (CLI + pipeline)
+│   ├── __init__.py            Exposes __version__ and main()
+│   ├── core.py                All pipeline logic: PyPKA runner, tautomer->CHARMM
+│   │                          mapping, PDB/RTF cross-validation, pKAI+
+│   │                          cross-validation, report writers (see docstrings
+│   │                          for full API detail)
+│   └── data/                  Package data — bundled CHARMM36 protein topology
+│       └── top_all36_prot.rtf
+├── tests/
+│   ├── test_pypkatool.py      Unit + regression + adversarial test suite
+│   ├── data/                  Benchmark input PDBs (used for manual/example runs)
+│   └── fixtures/               Frozen reference outputs (regression test fixtures,
+│                               one directory per benchmark protein/pH)
+├── examples/
+│   └── denv2.pdb               Example input for a quick first run
+├── environment.yml            Main conda environment (Python 3.10 + PyPKA + pKAI)
+├── environment-py27.yml       Python 2.7 helper environment (PyPKA internal dependency)
+└── pyproject.toml             Package metadata + `pypkatool` console script
 ```
+
+Note the two separate `data/` directories: `pypkatool/data/` ships *inside* the
+installed package (the RTF topology file the pipeline needs at runtime),
+while `tests/data/` is development-only input fixtures for the test suite
+and is never imported by `pypkatool` itself.
 
 ## References
 

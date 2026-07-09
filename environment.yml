@@ -1,4 +1,4 @@
-# Main runtime environment for PypKaTools.
+# Main runtime environment for pypkatool.
 #
 # Create it with:
 #   conda env create -f environment.yml

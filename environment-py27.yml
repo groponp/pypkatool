@@ -5,7 +5,7 @@
 # Create it with:
 #   conda env create -f environment-py27.yml
 #
-# You never activate this environment directly — PypKaTools finds
+# You never activate this environment directly — pypkatool finds
 # `<this-env>/bin/python2.7` automatically and prepends it to PATH for the
 # duration of a run (see pypkatool.core._inject_py27).
 name: py27

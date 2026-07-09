@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PypKaTools core module: PyPKA pKa results to CHARMM-GUI protonation states.
+"""pypkatool core module: PyPKA pKa results to CHARMM-GUI protonation states.
 
 This module drives `PyPKA <https://doi.org/10.1021/acs.jcim.0c00718>`_
 (Poisson-Boltzmann + Monte Carlo pKa calculation) on an input structure,
@@ -1324,7 +1324,7 @@ def write_cv_report(rows: list[CVRow], outdir: Path, ph: float) -> Path:
     col = (f"{'RESNAME':<8} {'RESID':>6} {'CHAIN':>6}  {'PKA_PYPKA':>10} "
            f"{'%PROT_PYPKA':>12}  {'PKA_PKAI+':>10} {'%PROT_PKAI+':>12}  {'AGREE':>6}")
     lines = [
-        f"# PypKaTools cross-validation: PyPKA vs pKAI+ | pH={ph}",
+        f"# pypkatool cross-validation: PyPKA vs pKAI+ | pH={ph}",
         f"# Agreement (all)       : {a_all}/{len(rows)} ({100*a_all/len(rows):.1f}%)" if rows else "# N/A",
         f"# Agreement (|pKa-pH|≤2): {a_near}/{len(near)} ({100*a_near/len(near):.1f}%)" if near else "# near: N/A",
         "-"*90, col, "-"*90,
@@ -1341,7 +1341,7 @@ def write_cv_report(rows: list[CVRow], outdir: Path, ph: float) -> Path:
 # ── Report generator ──────────────────────────────────────────────────────────
 
 _DAT_HDR = """\
-# PypKaTools v{v} | engine=PyPKA | epsin={e} | ionicstr={i} | pH={ph}
+# pypkatool v{v} | engine=PyPKA | epsin={e} | ionicstr={i} | pH={ph}
 # protein={prot} | date={date} | input={pdb}
 # Reference: PyPKA DOI 10.1021/acs.jcim.0c00718 | Cross-validation: pKAI+ (ML)
 #
@@ -1443,7 +1443,7 @@ def write_json(mapped: list[MappedResidue], outdir: Path, protein: str,
     """
     dest = outdir / "protonation_inputs.json"
     data = {
-        "protein": protein, "target_ph": ph, "tool": "PypKaTools",
+        "protein": protein, "target_ph": ph, "tool": "pypkatool",
         "engine": "PyPKA", "pypka_version": pypka_ver,
         "epsin": params.get("epsin",15), "ionicstr": params.get("ionicstr",0.1),
         "rtf_source": "top_all36_prot.rtf",
@@ -1540,7 +1540,7 @@ def _save_protocol(params: dict, pdb_path: Path, ph: float, outdir: Path) -> Non
     try: pypka_ver = importlib.metadata.version("pypka")
     except Exception: pypka_ver = "unknown"
     (outdir/"protocol.json").write_text(json.dumps({
-        "tool":"PypKaTools","engine":"PyPKA","pypka_version":pypka_ver,
+        "tool":"pypkatool","engine":"PyPKA","pypka_version":pypka_ver,
         "reference":"DOI: 10.1021/acs.jcim.0c00718",
         "parameters":{k:v for k,v in params.items() if k!="structure"},
         "input_pdb":str(pdb_path),"target_ph":ph,
@@ -1607,10 +1607,16 @@ def _post(mapped_raw: list[SiteResult], prot_pdb: Path, pdb_path: Path,
     try: pypka_ver = importlib.metadata.version("pypka")
     except Exception: pypka_ver = "unknown"
 
-    # "autopypka_" strip: back-compat with output dirs from this tool's predecessor
-    # (AutoPypKa); unrelated to any conda environment name.
-    write_dat(mapped, outdir, outdir.name.replace("pypkatools_","").replace("autopypka_","").split("_pH")[0],
-              ph, pdb_path, params, pkai_map)
+    # Strip whichever default-outdir prefix produced this directory, to recover
+    # a clean protein name for the report header: "pypkatool_" (current),
+    # "pypkatools_" / "autopypka_" (older name generations of this same tool).
+    protein_name = outdir.name
+    for prefix in ("pypkatool_", "pypkatools_", "autopypka_"):
+        if protein_name.startswith(prefix):
+            protein_name = protein_name[len(prefix):]
+            break
+    protein_name = protein_name.split("_pH")[0]
+    write_dat(mapped, outdir, protein_name, ph, pdb_path, params, pkai_map)
     write_json(mapped, outdir, pdb_path.stem, ph, pdb_path, params, pypka_ver)
     write_detail_json(mapped, outdir)
     _save_pypka_out(mapped_raw, outdir, ph, pkai_map=pkai_map)
@@ -1628,10 +1634,10 @@ def cmd_run(args: argparse.Namespace) -> None:
     print("\n[0/2] Validating PDB...")
     validate_pdb(pdb_path)
     ph: float = args.ph
-    outdir = Path(args.outdir) if args.outdir else pdb_path.parent / f"pypkatools_{pdb_path.stem}_pH{ph}"
+    outdir = Path(args.outdir) if args.outdir else pdb_path.parent / f"pypkatool_{pdb_path.stem}_pH{ph}"
     outdir.mkdir(parents=True, exist_ok=True)
 
-    print(f"\n{'='*60}\nPypKaTools | {pdb_path.stem} | pH {ph}\n{'='*60}")
+    print(f"\n{'='*60}\npypkatool | {pdb_path.stem} | pH {ph}\n{'='*60}")
     print(f"  Input: {pdb_path}  epsin={args.epsin}  ncpus={args.ncpus}")
 
     print("\n[1/2] Running PyPKA (PB+MC)...")
@@ -1682,7 +1688,7 @@ def cmd_reprocess(args: argparse.Namespace) -> None:
     stem = prot_pdb.name.split("_protonated_")[0]
     pdb_path = Path(args.pdb).resolve() if args.pdb else outdir / f"{stem}.pdb"
 
-    print(f"\n{'='*60}\nPypKaTools reprocess | {stem} | pH {ph}\n{'='*60}")
+    print(f"\n{'='*60}\npypkatool reprocess | {stem} | pH {ph}\n{'='*60}")
     print(f"  titration : {titration_dat.name}\n  prot_pdb  : {prot_pdb.name}")
 
     print("\n[1/2] Reconstructing sites...")
