@@ -1,5 +1,5 @@
-# PypKaTools v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=5.0
-# protein=3j27_dengue | date=2026-06-26 | input=3j27.pdb
+# pypkatool v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=5.0
+# protein=3j27_dengue | date=2026-07-09 | input=3j27.pdb
 # Reference: PyPKA DOI 10.1021/acs.jcim.0c00718 | Cross-validation: pKAI+ (ML)
 #
 # Only residues requiring CHARMM-GUI action are listed.
@@ -12,21 +12,21 @@
 ----------------------------------------------------------------------------------------------------
 RESNAME   RESID  CHAIN   PKA_PYPKA    %PROT  %DEPROT   PKA_PKAI+  CHARMM_LABEL    RTF  ACTION
 ----------------------------------------------------------------------------------------------------
-HIS          27      A        3.83     10.1     89.9        5.42  HSE             YES  RESI
-HIS          94      A        6.68     97.2      2.8        6.88  HSP             YES  RESI
-HIS         144      A        5.81     84.6     15.4        7.32  HSP             YES  RESI
-HIS         149      A        5.94     80.4     19.6        6.55  HSP             YES  RESI
-HIS         158      A        6.11     83.3     16.7        6.48  HSP             YES  RESI
-HIS         209      A        6.23     92.6      7.4        6.38  HSP             YES  RESI
-HIS         244      A        5.51     76.5     23.5        6.56  HSP             YES  RESI
-HIS         261      A        6.19     93.2      6.8        6.74  HSP             YES  RESI
-HIS         282      A        7.21     98.3      1.7        6.72  HSP             YES  RESI
-HIS         317      A        5.99     88.6     11.4        6.89  HSP             YES  RESI
-HIS         346      A        7.12     99.3      0.7        6.75  HSP             YES  RESI
-ASP         421      A        5.00     50.0     50.0        3.90  ASPP            YES  TIE
-HIS         437      A        6.10     92.4      7.6        6.24  HSP             YES  RESI
-HIS           7      B        4.47     24.3     75.7        5.73  HSD             YES  RESI
-HIS          28      B        5.89     88.5     11.5        6.17  HSP             YES  RESI
-HIS          39      B        6.22     94.2      5.8        6.53  HSP             YES  RESI
-HIS          57      B        5.44     73.1     26.9        6.35  HSP             YES  RESI
+HIS          27      A        4.68     36.2     63.8        5.42  HSE             YES  RESI
+HIS          94      A        6.77     97.6      2.4        6.88  HSP             YES  RESI
+HIS         144      A        6.01     90.2      9.8        7.32  HSP             YES  RESI
+HIS         149      A        5.78     75.0     25.0        6.55  HSP             YES  RESI
+HIS         158      A        5.90     78.0     22.0        6.48  HSP             YES  RESI
+GLU         184      A        5.15     57.4     42.6        4.40  GLUP            YES  PATCH
+HIS         209      A        5.99     89.0     11.0        6.38  HSP             YES  RESI
+HIS         244      A        5.90     88.7     11.3        6.56  HSP             YES  RESI
+HIS         261      A        6.14     92.9      7.1        6.74  HSP             YES  RESI
+HIS         282      A        7.00     98.0      2.0        6.72  HSP             YES  RESI
+HIS         317      A        6.31     94.4      5.6        6.89  HSP             YES  RESI
+HIS         346      A        7.04     99.1      0.9        6.75  HSP             YES  RESI
+HIS         437      A        6.28     94.8      5.2        6.24  HSP             YES  RESI
+HIS           7      B        4.08     12.3     87.7        5.73  HSD             YES  RESI
+HIS          28      B        6.09     92.3      7.7        6.17  HSP             YES  RESI
+HIS          39      B        6.43     96.3      3.7        6.53  HSP             YES  RESI
+HIS          57      B        5.58     78.9     21.1        6.35  HSP             YES  RESI
 ----------------------------------------------------------------------------------------------------

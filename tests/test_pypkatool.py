@@ -291,10 +291,10 @@ KNOWN = {
     ("barnase",  "HIS",100, "A"): "HSE",    # canonical His102, pKa~6.3
     ("snase",    "HIS",  3, "A"): "HSE",    # canonical His8, pKa~6.5
     ("thiorx",   "HIS",  6, "A"): "HSE",    # pKa~6.2
-    # denv3 chain A HIS144 + HIS315: pKa~4.8 (borderline), PyPKA PB gives HSE in dimer
+    # denv3 chain A HIS144: pKa~3.7 (buried, dimer PB static-structure limitation)
     # (virion/cryo-EM shifts pKa up; documented PB limitation for buried residues)
     ("denv3",    "HIS",144, "A"): "HSE",    # buried, pKa<5 in dimer PB - expected limitation
-    ("denv3",    "HIS",315, "A"): "HSE",    # pKa~4.8 borderline → HSE in dimer; HSP in virion
+    ("denv3",    "HIS",315, "A"): "HSP",    # pKa~5.3 under CHARMM36m (>5.0 target pH → HSP)
 }
 
 for (prot, resname, resid, chain), exp_lbl in KNOWN.items():
@@ -1373,23 +1373,18 @@ check("THR no HG1 → label stays 'THR' (not changed to invalid 'THR_nohg1')",
 check("THR no HG1 → needs_action stays False (no patch to apply)",
       not _res_thr[0].needs_action, f"needs_action={_res_thr[0].needs_action}")
 
-# THR in real output: all protonated (pKa ~14), needs_action=False, absent from .dat
+# THR in real output: PyPKA disables SER/THR titration whenever ffID contains
+# "charmm36m" (pypka/config.py Config.set_radii_charges_paths), which is the
+# ffID pypkatool always runs with (see README "Force field parameters") - so
+# THR must never appear as a titratable site at all under CHARMM36m.
 _lys_dir = RESULTS["lysozyme"]
 if _lys_dir.exists():
     import json as _json
     _lys_j = _json.loads((_lys_dir / "protonation_inputs.json").read_text())
     _lys_thr = [r for r in _lys_j["summary"] if r["resname"] == "THR"]
-    check("lysozyme: THR residues present in JSON summary (titration ran for THR)",
-          len(_lys_thr) > 0, f"found {len(_lys_thr)} THR entries")
-    check("lysozyme: all THR in JSON have final_label='THR' (both states map same)",
-          all(r["final_label"] == "THR" for r in _lys_thr),
-          str([(r["resid"],r["final_label"]) for r in _lys_thr if r["final_label"]!="THR"]))
-    check("lysozyme: all THR have needs_action=False (THR excluded from action table)",
-          all(not r["needs_action"] for r in _lys_thr),
-          str([(r["resid"],r["needs_action"]) for r in _lys_thr]))
-    check("lysozyme: all THR have pct_protonated=100.0 at pH 7.0 (pKa~14 >> 7)",
-          all(r["pct_protonated"] == 100.0 for r in _lys_thr),
-          str([(r["resid"],r["pct_protonated"]) for r in _lys_thr if r["pct_protonated"]!=100.0]))
+    check("lysozyme: THR absent from JSON summary (ser_thr_titration disabled under CHARMM36m)",
+          len(_lys_thr) == 0, f"found {len(_lys_thr)} unexpected THR entries: "
+          f"{[(r['resid'],r['final_label']) for r in _lys_thr]}")
     _dat_thr = [l for l in (_lys_dir/"protonation_inputs.dat").read_text().splitlines()
                 if not l.startswith("#") and "THR" in l.split()[:1]]
     check("lysozyme: THR absent from protonation_inputs.dat (no CHARMM action needed)",
@@ -1450,13 +1445,13 @@ if RESULTS["lysozyme"].exists():
     _lj = _json3.loads((RESULTS["lysozyme"] / "protonation_inputs.json").read_text())
     _his15 = next((r for r in _lj["summary"] if r["resname"]=="HIS" and r["resid"]==15 and r["chain"]=="A"), None)
     check("lysozyme HIS15 A: in JSON summary", _his15 is not None, "not found")
-    check("lysozyme HIS15 A: final_label=HSE (deprotonated at pH 7.0, pKa 5.88)",
+    check("lysozyme HIS15 A: final_label=HSE (deprotonated at pH 7.0, pKa 6.33)",
           _his15 is not None and _his15["final_label"] == "HSE",
           f"got {_his15.get('final_label') if _his15 else 'missing'}")
     check("lysozyme HIS15 A: needs_action=True (differs from HSD default)",
           _his15 is not None and _his15["needs_action"],
           f"needs_action={_his15.get('needs_action') if _his15 else 'missing'}")
-    check("lysozyme HIS15 A: pct_deprotonated > 80% at pH 7.0 (pKa 5.88 << 7.0)",
+    check("lysozyme HIS15 A: pct_deprotonated > 80% at pH 7.0 (pKa 6.33 < 7.0)",
           _his15 is not None and _his15["pct_deprotonated"] > 80.0,
           f"pct_d={_his15.get('pct_deprotonated') if _his15 else 'missing'}")
 

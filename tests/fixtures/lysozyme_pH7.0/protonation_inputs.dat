@@ -1,5 +1,5 @@
-# PypKaTools v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=7.0
-# protein=lysozyme | date=2026-06-26 | input=lysozyme.pdb
+# pypkatool v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=7.0
+# protein=lysozyme | date=2026-07-09 | input=lysozyme.pdb
 # Reference: PyPKA DOI 10.1021/acs.jcim.0c00718 | Cross-validation: pKAI+ (ML)
 #
 # Only residues requiring CHARMM-GUI action are listed.
@@ -12,5 +12,5 @@
 ----------------------------------------------------------------------------------------------------
 RESNAME   RESID  CHAIN   PKA_PYPKA    %PROT  %DEPROT   PKA_PKAI+  CHARMM_LABEL    RTF  ACTION
 ----------------------------------------------------------------------------------------------------
-HIS          15      A        5.88      6.9     93.1        6.56  HSE             YES  RESI
+HIS          15      A        6.33     17.7     82.3        6.56  HSE             YES  RESI
 ----------------------------------------------------------------------------------------------------

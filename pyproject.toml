@@ -32,4 +32,4 @@ pypkatool = "pypkatool.core:main"
 packages = ["pypkatool"]
 
 [tool.setuptools.package-data]
-pypkatool = ["data/top_all36_prot.rtf"]
+pypkatool = ["data/top_all36_prot.rtf", "data/fixstructure_worker.py"]

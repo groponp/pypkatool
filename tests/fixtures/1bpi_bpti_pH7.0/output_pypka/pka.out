@@ -2,21 +2,17 @@
 # RESNAME   RESID  CHAIN     pKA_PyPKA     pKA_pKAI+
 # pKA_pKAI+: N/P = residue not paired with pKAI+ output
 --------------------------------------------------------
-  NTR           1      A          7.32           N/P
-  ASP           3      A          3.23          3.58
-  GLU           7      A          3.99          3.83
-  TYR          10      A          9.27          9.45
-  THR          11      A           N/A           N/P
-  LYS          15      A         10.61         10.52
-  TYR          21      A          9.94          9.81
-  TYR          23      A         10.10          9.93
-  LYS          26      A         10.43         10.43
-  THR          32      A           N/A           N/P
-  TYR          35      A          9.48          9.37
-  LYS          41      A         11.12         10.75
-  LYS          46      A         10.25         10.33
-  SER          47      A           N/A           N/P
-  GLU          49      A          3.80          4.10
-  ASP          50      A          3.23          3.34
-  THR          54      A           N/A           N/P
-  CTR          58      A          3.15           N/P
+  NTR           1      A          8.04           N/P
+  ASP           3      A          3.34          3.58
+  GLU           7      A          3.80          3.83
+  TYR          10      A          8.91          9.45
+  LYS          15      A         10.60         10.52
+  TYR          21      A          9.59          9.81
+  TYR          23      A          9.50          9.93
+  LYS          26      A         10.46         10.43
+  TYR          35      A          9.20          9.37
+  LYS          41      A         10.99         10.75
+  LYS          46      A         10.31         10.33
+  GLU          49      A          3.79          4.10
+  ASP          50      A          3.15          3.34
+  CTR          58      A          2.02           N/P

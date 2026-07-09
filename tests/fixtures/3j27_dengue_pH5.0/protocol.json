@@ -1,5 +1,5 @@
 {
-  "tool": "PypKaTools",
+  "tool": "pypkatool",
   "engine": "PyPKA",
   "pypka_version": "2.10.0",
   "reference": "DOI: 10.1021/acs.jcim.0c00718",
@@ -9,11 +9,12 @@
     "pbc_dimensions": 0,
     "convergence": 0.1,
     "pH": "0,14",
-    "ncpus": 6,
-    "structure_output": "/media/groponp/Galvani/Scripts/Pypka/scripts/tests/pypkatools_3j27_dengue_pH5.0/output_pypka/3j27_protonated_pH5.0.pdb, 5.0, charmm",
-    "titration_output": "/media/groponp/Galvani/Scripts/Pypka/scripts/tests/pypkatools_3j27_dengue_pH5.0/output_pypka/3j27_titration.dat"
+    "ncpus": 12,
+    "ffID": "CHARMM36m",
+    "structure_output": "/media/groponp/Galvani/Scripts/Pypka/tests/fixtures/3j27_dengue_pH5.0/output_pypka/3j27_protonated_pH5.0.pdb, 5.0, charmm",
+    "titration_output": "/media/groponp/Galvani/Scripts/Pypka/tests/fixtures/3j27_dengue_pH5.0/output_pypka/3j27_titration.dat"
   },
-  "input_pdb": "/media/groponp/Galvani/Scripts/Pypka/scripts/tests/3j27.pdb",
+  "input_pdb": "/media/groponp/Galvani/Scripts/Pypka/tests/data/3j27.pdb",
   "target_ph": 5.0,
-  "generated": "2026-06-26T23:34:33.780419+00:00"
+  "generated": "2026-07-09T12:57:54.483276+00:00"
 }

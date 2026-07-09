@@ -1,37 +1,37 @@
-# AutoPypKa v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=5.0
-# protein=denv2 | date=2026-06-26 | input=denv2.pdb
+# pypkatool v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=5.0
+# protein=denv2 | date=2026-07-09 | input=denv2.pdb
 # Reference: PyPKA DOI 10.1021/acs.jcim.0c00718 | Cross-validation: pKAI+ (ML)
 #
 # Only residues requiring CHARMM-GUI action are listed.
 # Terminal groups (NTR/CTR) and default-state residues are omitted.
 # Full tautomer detail and RTF blocks are in detail.json.
 #
-# PKA_PKAI+: N/A = pKAI+ not run | N/P = not paired
+# PKA_PKAI+: N/P = residue not paired with pKAI+ output
 # ACTION   : RESI = set in PDB Reader | PATCH = Patches panel | TIE = ambiguous
 
 ----------------------------------------------------------------------------------------------------
 RESNAME   RESID  CHAIN   PKA_PYPKA    %PROT  %DEPROT   PKA_PKAI+  CHARMM_LABEL    RTF  ACTION
 ----------------------------------------------------------------------------------------------------
-HIS          27      A        5.52     74.9     25.1        6.25  HSP             YES  RESI             #ok 
-HIS          94      A        7.89     99.8      0.2        7.51  HSP             YES  RESI             #ok 
-HIS         144      A        2.85     10.2     89.8        6.07  HSE             YES  RESI             #ok
-HIS         149      A        7.10     98.8      1.2        6.91  HSP             YES  RESI             #ok
-HIS         158      A        5.50     74.4     25.6        6.44  HSP             YES  RESI             #
-HIS         209      A        6.00     90.4      9.6        6.63  HSP             YES  RESI
-HIS         244      A        6.09     89.7     10.3        6.45  HSP             YES  RESI
-HIS         261      A        5.54     77.0     23.0        6.32  HSP             YES  RESI
-HIS         282      A        6.48     96.5      3.5        6.70  HSP             YES  RESI
-HIS         317      A        5.68     82.0     18.0        6.71  HSP             YES  RESI
-HIS         346      A        6.96     98.9      1.1        6.78  HSP             YES  RESI
-HIS          27      B        5.48     73.4     26.6        6.19  HSP             YES  RESI
-HIS          94      B        7.85     99.8      0.2        7.48  HSP             YES  RESI
-HIS         144      B        5.87     73.8     26.2        5.88  HSP             YES  RESI
-HIS         149      B        7.04     98.7      1.3        6.91  HSP             YES  RESI
-HIS         158      B        5.79     84.2     15.8        6.46  HSP             YES  RESI
-HIS         209      B        6.17     93.5      6.5        6.70  HSP             YES  RESI
-HIS         244      B        5.92     87.6     12.4        6.51  HSP             YES  RESI
-HIS         261      B        5.40     70.3     29.7        6.14  HSP             YES  RESI
-HIS         282      B        6.50     96.6      3.4        6.69  HSP             YES  RESI
-HIS         317      B        5.74     83.4     16.6        6.74  HSP             YES  RESI
-HIS         346      B        6.69     98.0      2.0        6.74  HSP             YES  RESI
+HIS          27      A        5.35     68.0     32.0        6.25  HSP             YES  RESI
+HIS          94      A        7.73     99.7      0.3        7.51  HSP             YES  RESI
+HIS         144      A        3.67      9.8     90.2        6.07  HSE             YES  RESI
+HIS         149      A        7.21     99.0      1.0        6.91  HSP             YES  RESI
+HIS         158      A        5.80     85.7     14.3        6.44  HSP             YES  RESI
+HIS         209      A        5.96     89.8     10.2        6.63  HSP             YES  RESI
+HIS         244      A        6.16     91.0      9.0        6.45  HSP             YES  RESI
+HIS         261      A        5.77     84.6     15.4        6.32  HSP             YES  RESI
+HIS         282      A        6.55     96.8      3.2        6.70  HSP             YES  RESI
+HIS         317      A        6.06     91.8      8.2        6.71  HSP             YES  RESI
+HIS         346      A        6.88     98.7      1.3        6.78  HSP             YES  RESI
+HIS          27      B        5.32     65.9     34.1        6.19  HSP             YES  RESI
+HIS          94      B        7.74     99.7      0.3        7.48  HSP             YES  RESI
+HIS         144      B        5.74     70.2     29.8        5.88  HSP             YES  RESI
+HIS         149      B        7.16     99.0      1.0        6.91  HSP             YES  RESI
+HIS         158      B        5.89     86.4     13.6        6.46  HSP             YES  RESI
+HIS         209      B        6.20     94.0      6.0        6.70  HSP             YES  RESI
+HIS         244      B        6.28     93.5      6.5        6.51  HSP             YES  RESI
+HIS         261      B        5.67     81.8     18.2        6.14  HSP             YES  RESI
+HIS         282      B        6.53     96.8      3.2        6.69  HSP             YES  RESI
+HIS         317      B        6.10     91.6      8.4        6.74  HSP             YES  RESI
+HIS         346      B        6.61     97.6      2.4        6.74  HSP             YES  RESI
 ----------------------------------------------------------------------------------------------------

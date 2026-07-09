@@ -1,307 +1,202 @@
-# pKa per residue | pH=5.0 | engine=PyPKA
-# RESNAME   RESID  CHAIN       pKA
-------------------------------------------
-  NTR           1      A      6.31
-  SER           7      A       N/A
-  ASP          10      A      4.30
-  GLU          13      A      3.94
-  SER          16      A       N/A
-  SER          19      A       N/A
-  ASP          22      A      3.08
-  GLU          26      A      3.63
-  HIS          27      A      5.52
-  SER          29      A       N/A
-  THR          32      A       N/A
-  THR          33      A       N/A
-  LYS          36      A     10.49
-  LYS          38      A     11.01
-  THR          40      A       N/A
-  ASP          42      A       N/A
-  GLU          44      A      2.61
-  LYS          47      A     10.54
-  THR          48      A       N/A
-  GLU          49      A      4.30
-  LYS          51      A     11.54
-  THR          55      A       N/A
-  LYS          58      A     11.53
-  TYR          59      A     11.63
-  GLU          62      A      2.82
-  LYS          64      A      9.70
-  THR          66      A       N/A
-  THR          68      A       N/A
-  THR          69      A       N/A
-  THR          70      A       N/A
-  GLU          71      A      3.51
-  SER          72      A       N/A
-  THR          76      A       N/A
-  GLU          79      A      3.85
-  THR          81      A       N/A
-  GLU          84      A      4.07
-  GLU          85      A      2.86
-  ASP          87      A      1.65
-  LYS          88      A     10.34
-  LYS          93      A     10.02
-  HIS          94      A      7.89
-  SER          95      A       N/A
-  ASP          98      A      2.00
-  LYS         110      A     11.33
-  THR         115      A       N/A
-  THR         120      A       N/A
-  LYS         122      A     10.69
-  LYS         123      A     11.31
-  GLU         126      A      3.95
-  LYS         128      A     11.16
-  GLU         133      A      3.81
-  GLU         136      A      3.50
-  TYR         137      A     10.88
-  THR         138      A       N/A
-  THR         142      A       N/A
-  HIS         144      A      2.85
-  SER         145      A       N/A
-  GLU         147      A      2.46
-  GLU         148      A      3.98
-  HIS         149      A      7.10
-  ASP         154      A      3.55
-  THR         155      A       N/A
-  LYS         157      A     10.47
-  HIS         158      A      5.50
-  LYS         160      A     10.13
-  GLU         161      A      3.63
-  LYS         163      A     10.94
-  THR         165      A       N/A
-  SER         168      A       N/A
-  SER         169      A       N/A
-  THR         171      A       N/A
-  GLU         172      A      4.04
-  GLU         174      A      4.24
-  THR         176      A       N/A
-  TYR         178      A      9.34
-  THR         180      A       N/A
-  THR         182      A       N/A
-  GLU         184      A      3.08
-  SER         186      A       N/A
-  THR         189      A       N/A
-  ASP         192      A      3.10
-  GLU         195      A      4.20
-  LYS         202      A     10.82
-  ASP         203      A      3.99
-  LYS         204      A     10.22
-  HIS         209      A      6.00
-  ASP         215      A      4.50
-  ASP         225      A      2.67
-  THR         226      A       N/A
-  SER         229      A       N/A
-  LYS         234      A     11.06
-  GLU         235      A      3.48
-  THR         236      A       N/A
-  THR         239      A       N/A
-  LYS         241      A     10.28
-  HIS         244      A      6.09
-  LYS         246      A     10.48
-  LYS         247      A     10.52
-  ASP         249      A      3.02
-  SER         255      A       N/A
-  GLU         257      A      2.41
-  HIS         261      A      5.54
-  THR         262      A       N/A
-  THR         265      A       N/A
-  THR         268      A       N/A
-  GLU         269      A      4.55
-  SER         273      A       N/A
-  SER         274      A       N/A
-  THR         280      A       N/A
-  HIS         282      A      6.48
-  LYS         284      A      9.65
-  ASP         290      A      2.75
-  LYS         291      A     10.60
-  LYS         295      A     11.39
-  SER         298      A       N/A
-  TYR         299      A      9.94
-  SER         300      A       N/A
-  THR         303      A       N/A
-  LYS         305      A      8.42
-  LYS         307      A     10.49
-  LYS         310      A     10.19
-  GLU         311      A      4.21
-  GLU         314      A      4.44
-  THR         315      A       N/A
-  HIS         317      A      5.68
-  THR         319      A       N/A
-  TYR         326      A      9.65
-  GLU         327      A      3.86
-  ASP         329      A      3.22
-  SER         331      A       N/A
-  LYS         334      A     10.62
-  GLU         338      A      4.55
-  ASP         341      A      1.10
-  GLU         343      A      4.11
-  LYS         344      A     10.95
-  HIS         346      A      6.96
-  THR         353      A       N/A
-  THR         359      A       N/A
-  GLU         360      A      4.33
-  LYS         361      A     11.45
-  ASP         362      A      3.77
-  SER         363      A       N/A
-  GLU         368      A       N/A
-  GLU         370      A      3.51
-  ASP         375      A      4.02
-  SER         376      A       N/A
-  TYR         377      A     10.40
-  GLU         383      A      3.89
-  LYS         388      A     10.06
-  LYS         393      A     10.93
-  CTR         394      A      3.12
-  LYS         394      A     10.85
-  NTR           1      B      4.51
-  SER           7      B       N/A
-  ASP          10      B      4.25
-  GLU          13      B      3.88
-  SER          16      B       N/A
-  SER          19      B       N/A
-  ASP          22      B      3.12
-  GLU          26      B      3.69
-  HIS          27      B      5.48
-  SER          29      B       N/A
-  THR          32      B       N/A
-  THR          33      B       N/A
-  LYS          36      B     10.47
-  LYS          38      B     11.02
-  THR          40      B       N/A
-  ASP          42      B       N/A
-  GLU          44      B      2.44
-  LYS          47      B     11.31
-  THR          48      B       N/A
-  GLU          49      B      4.76
-  LYS          51      B     11.58
-  THR          55      B       N/A
-  LYS          58      B     11.50
-  TYR          59      B     11.61
-  GLU          62      B      2.85
-  LYS          64      B      9.72
-  THR          66      B       N/A
-  THR          68      B       N/A
-  THR          69      B       N/A
-  THR          70      B       N/A
-  GLU          71      B      3.46
-  SER          72      B       N/A
-  THR          76      B       N/A
-  GLU          79      B      3.87
-  THR          81      B       N/A
-  GLU          84      B      4.09
-  GLU          85      B      2.96
-  ASP          87      B      1.67
-  LYS          88      B     10.36
-  LYS          93      B      9.95
-  HIS          94      B      7.85
-  SER          95      B       N/A
-  ASP          98      B      1.73
-  LYS         110      B     11.24
-  THR         115      B       N/A
-  THR         120      B       N/A
-  LYS         122      B     10.67
-  LYS         123      B     11.33
-  GLU         126      B      4.01
-  LYS         128      B     11.05
-  GLU         133      B      3.69
-  GLU         136      B      3.62
-  TYR         137      B     10.93
-  THR         138      B       N/A
-  THR         142      B       N/A
-  HIS         144      B      5.87
-  SER         145      B       N/A
-  GLU         147      B      2.44
-  GLU         148      B      3.95
-  HIS         149      B      7.04
-  ASP         154      B      3.53
-  THR         155      B       N/A
-  LYS         157      B     10.48
-  HIS         158      B      5.79
-  LYS         160      B     10.59
-  GLU         161      B      3.54
-  LYS         163      B     10.79
-  THR         165      B       N/A
-  SER         168      B       N/A
-  SER         169      B       N/A
-  THR         171      B       N/A
-  GLU         172      B      4.06
-  GLU         174      B      4.18
-  THR         176      B       N/A
-  TYR         178      B      9.42
-  THR         180      B       N/A
-  THR         182      B       N/A
-  GLU         184      B      3.07
-  SER         186      B       N/A
-  THR         189      B       N/A
-  ASP         192      B      3.06
-  GLU         195      B      4.25
-  LYS         202      B     10.87
-  ASP         203      B      4.10
-  LYS         204      B     10.03
-  HIS         209      B      6.17
-  ASP         215      B      4.54
-  ASP         225      B      2.64
-  THR         226      B       N/A
-  SER         229      B       N/A
-  LYS         234      B     10.87
-  GLU         235      B      3.46
-  THR         236      B       N/A
-  THR         239      B       N/A
-  LYS         241      B     10.05
-  HIS         244      B      5.92
-  LYS         246      B     10.39
-  LYS         247      B     10.49
-  ASP         249      B      2.72
-  SER         255      B       N/A
-  GLU         257      B      2.53
-  HIS         261      B      5.40
-  THR         262      B       N/A
-  THR         265      B       N/A
-  THR         268      B       N/A
-  GLU         269      B      4.36
-  SER         273      B       N/A
-  SER         274      B       N/A
-  THR         280      B       N/A
-  HIS         282      B      6.50
-  LYS         284      B      9.67
-  ASP         290      B      2.77
-  LYS         291      B     10.62
-  LYS         295      B     11.50
-  SER         298      B       N/A
-  TYR         299      B      9.95
-  SER         300      B       N/A
-  THR         303      B       N/A
-  LYS         305      B      8.65
-  LYS         307      B     10.54
-  LYS         310      B     10.24
-  GLU         311      B      4.20
-  GLU         314      B      4.42
-  THR         315      B       N/A
-  HIS         317      B      5.74
-  THR         319      B       N/A
-  TYR         326      B      9.47
-  GLU         327      B      3.85
-  ASP         329      B      3.23
-  SER         331      B       N/A
-  LYS         334      B     10.54
-  GLU         338      B      4.45
-  ASP         341      B      0.16
-  GLU         343      B      3.77
-  LYS         344      B     10.62
-  HIS         346      B      6.69
-  THR         353      B       N/A
-  THR         359      B       N/A
-  GLU         360      B      4.31
-  LYS         361      B     11.42
-  ASP         362      B      3.77
-  SER         363      B       N/A
-  GLU         368      B       N/A
-  GLU         370      B      3.53
-  ASP         375      B      3.99
-  SER         376      B       N/A
-  TYR         377      B     10.25
-  GLU         383      B      3.64
-  LYS         388      B     11.12
-  LYS         393      B     10.94
-  CTR         394      B      3.10
-  LYS         394      B     10.87
+# pKa per residue | pH=5.0 | PyPKA + pKAI+ cross-validation
+# RESNAME   RESID  CHAIN     pKA_PyPKA     pKA_pKAI+
+# pKA_pKAI+: N/P = residue not paired with pKAI+ output
+--------------------------------------------------------
+  NTR           1      A          7.20           N/P
+  ASP          10      A          4.17          3.82
+  GLU          13      A          3.91          3.87
+  ASP          22      A          2.57          3.44
+  GLU          26      A          3.70          3.51
+  HIS          27      A          5.35          6.25
+  LYS          36      A         10.46         10.43
+  LYS          38      A         11.12         10.80
+  ASP          42      A           N/A          1.65
+  GLU          44      A          2.16          2.97
+  LYS          47      A         10.85         10.71
+  GLU          49      A          4.27          4.17
+  LYS          51      A         11.04         11.01
+  LYS          58      A         11.28         11.13
+  TYR          59      A         10.60         10.72
+  GLU          62      A          2.95          3.12
+  LYS          64      A          9.64         10.37
+  GLU          71      A          3.32          3.69
+  GLU          79      A          3.79          3.93
+  GLU          84      A          3.91          4.10
+  GLU          85      A          2.90          3.42
+  ASP          87      A          1.54          2.78
+  LYS          88      A         10.41         10.47
+  LYS          93      A          9.89         10.25
+  HIS          94      A          7.73          7.51
+  ASP          98      A          1.78          2.96
+  LYS         110      A         11.06         10.72
+  LYS         122      A         10.72         10.74
+  LYS         123      A         11.19         11.49
+  GLU         126      A          3.57          3.65
+  LYS         128      A         10.85         10.83
+  GLU         133      A          3.82          4.07
+  GLU         136      A          3.24          3.90
+  TYR         137      A         10.15         10.58
+  HIS         144      A          3.67          6.07
+  GLU         147      A          2.36          2.71
+  GLU         148      A          3.70          3.79
+  HIS         149      A          7.21          6.91
+  ASP         154      A          3.51          3.47
+  LYS         157      A         10.54         10.46
+  HIS         158      A          5.80          6.44
+  LYS         160      A         10.36         10.54
+  GLU         161      A          3.52          3.67
+  LYS         163      A         10.76         10.96
+  GLU         172      A          4.02          4.09
+  GLU         174      A          4.08          4.10
+  TYR         178      A          9.09          9.61
+  GLU         184      A          3.12          3.67
+  ASP         192      A          2.95          3.43
+  GLU         195      A          3.96          4.16
+  LYS         202      A         10.76         10.63
+  ASP         203      A          3.82          3.70
+  LYS         204      A         10.02         10.59
+  HIS         209      A          5.96          6.63
+  ASP         215      A          4.14          4.01
+  ASP         225      A          2.38          3.31
+  LYS         234      A         10.74         10.89
+  GLU         235      A          3.36          3.92
+  LYS         241      A         10.42         10.55
+  HIS         244      A          6.16          6.45
+  LYS         246      A         10.40         10.90
+  LYS         247      A         10.71         10.67
+  ASP         249      A          2.87          3.24
+  GLU         257      A          2.28          3.03
+  HIS         261      A          5.77          6.32
+  GLU         269      A          4.32          4.34
+  HIS         282      A          6.55          6.70
+  LYS         284      A          9.62         10.10
+  ASP         290      A          2.31          3.37
+  LYS         291      A         10.64         10.78
+  LYS         295      A         11.02         10.88
+  TYR         299      A          9.60          9.78
+  LYS         305      A          8.86         10.41
+  LYS         307      A         10.32         10.83
+  LYS         310      A         10.07         10.24
+  GLU         311      A          4.10          4.17
+  GLU         314      A          4.35          4.33
+  HIS         317      A          6.06          6.71
+  TYR         326      A          8.50          9.80
+  GLU         327      A          3.69          3.88
+  ASP         329      A          3.11          3.51
+  LYS         334      A          9.97         10.40
+  GLU         338      A          4.38          4.24
+  ASP         341      A          1.40          2.43
+  GLU         343      A          4.06          4.07
+  LYS         344      A         11.05         10.74
+  HIS         346      A          6.88          6.78
+  GLU         360      A          4.30          4.24
+  LYS         361      A         11.34         10.94
+  ASP         362      A          3.64          3.73
+  GLU         368      A           N/A          1.70
+  GLU         370      A          3.38          3.63
+  ASP         375      A          3.84          3.86
+  TYR         377      A          9.77         10.05
+  GLU         383      A          3.70          4.00
+  LYS         388      A         10.00         10.48
+  LYS         393      A         10.86         10.83
+  CTR         394      A          1.96           N/P
+  LYS         394      A         10.77         10.53
+  NTR           1      B          5.92           N/P
+  ASP          10      B          4.20          3.82
+  GLU          13      B          3.88          3.84
+  ASP          22      B          2.61          3.45
+  GLU          26      B          3.69          3.56
+  HIS          27      B          5.32          6.19
+  LYS          36      B         10.45         10.43
+  LYS          38      B         11.10         10.77
+  ASP          42      B           N/A          1.46
+  GLU          44      B          2.06          3.02
+  LYS          47      B         11.19         10.73
+  GLU          49      B          4.61          4.12
+  LYS          51      B         11.07         11.03
+  LYS          58      B         11.35         11.16
+  TYR          59      B         10.54         10.70
+  GLU          62      B          2.62          3.15
+  LYS          64      B          9.80         10.38
+  GLU          71      B          3.23          3.66
+  GLU          79      B          3.78          3.95
+  GLU          84      B          3.91          4.07
+  GLU          85      B          3.09          3.46
+  ASP          87      B          1.58          2.78
+  LYS          88      B         10.41         10.47
+  LYS          93      B          9.95         10.25
+  HIS          94      B          7.74          7.48
+  ASP          98      B          1.41          2.90
+  LYS         110      B         11.06         10.79
+  LYS         122      B         10.72         10.73
+  LYS         123      B         11.25         11.49
+  GLU         126      B          3.61          3.71
+  LYS         128      B         10.75         10.86
+  GLU         133      B          3.72          3.97
+  GLU         136      B          3.34          3.88
+  TYR         137      B         10.17         10.49
+  HIS         144      B          5.74          5.88
+  GLU         147      B          2.47          2.78
+  GLU         148      B          3.69          3.76
+  HIS         149      B          7.16          6.91
+  ASP         154      B          3.48          3.45
+  LYS         157      B         10.52         10.48
+  HIS         158      B          5.89          6.46
+  LYS         160      B         10.58         10.59
+  GLU         161      B          3.37          3.62
+  LYS         163      B         10.92         10.94
+  GLU         172      B          4.02          4.09
+  GLU         174      B          3.97          4.08
+  TYR         178      B          9.09          9.72
+  GLU         184      B          3.04          3.66
+  ASP         192      B          2.81          3.39
+  GLU         195      B          4.02          4.18
+  LYS         202      B         10.77         10.67
+  ASP         203      B          3.93          3.70
+  LYS         204      B          9.83         10.43
+  HIS         209      B          6.20          6.70
+  ASP         215      B          4.20          4.02
+  ASP         225      B          2.38          3.32
+  LYS         234      B         10.66         10.90
+  GLU         235      B          3.37          3.92
+  LYS         241      B         10.03         10.28
+  HIS         244      B          6.28          6.51
+  LYS         246      B         10.29         10.95
+  LYS         247      B         10.72         10.60
+  ASP         249      B          2.62          3.14
+  GLU         257      B          2.31          3.02
+  HIS         261      B          5.67          6.14
+  GLU         269      B          4.14          4.26
+  HIS         282      B          6.53          6.69
+  LYS         284      B          9.63         10.14
+  ASP         290      B          2.40          3.37
+  LYS         291      B         10.71         10.79
+  LYS         295      B         11.17         10.94
+  TYR         299      B          9.73          9.80
+  LYS         305      B          9.05         10.39
+  LYS         307      B         10.51         10.85
+  LYS         310      B         10.13         10.22
+  GLU         311      B          4.10          4.18
+  GLU         314      B          4.33          4.30
+  HIS         317      B          6.10          6.74
+  TYR         326      B          8.38          9.86
+  GLU         327      B          3.70          3.85
+  ASP         329      B          3.11          3.51
+  LYS         334      B          9.82         10.37
+  GLU         338      B          4.26          4.18
+  ASP         341      B          0.63          1.99
+  GLU         343      B          3.66          3.93
+  LYS         344      B         10.50         10.72
+  HIS         346      B          6.61          6.74
+  GLU         360      B          4.28          4.24
+  LYS         361      B         11.23         10.93
+  ASP         362      B          3.65          3.73
+  GLU         368      B           N/A          1.63
+  GLU         370      B          3.39          3.65
+  ASP         375      B          3.77          3.85
+  TYR         377      B          9.84          9.87
+  GLU         383      B          3.49          3.93
+  LYS         388      B         10.82         10.87
+  LYS         393      B         10.86         10.85
+  CTR         394      B          1.97           N/P
+  LYS         394      B         10.81         10.54

@@ -1,5 +1,5 @@
 {
-  "tool": "AutoPypKa",
+  "tool": "pypkatool",
   "engine": "PyPKA",
   "pypka_version": "2.10.0",
   "reference": "DOI: 10.1021/acs.jcim.0c00718",
@@ -10,12 +10,11 @@
     "convergence": 0.1,
     "pH": "0,14",
     "ncpus": 12,
-    "structure_output": "/media/groponp/Galvani/Scripts/Pypka/tests/autopypka_pH5.0/denv2_protonated_pH5.0.pdb, 5.0, charmm",
-    "titration_output": "/media/groponp/Galvani/Scripts/Pypka/tests/autopypka_pH5.0/denv2_titration.dat"
+    "ffID": "CHARMM36m",
+    "structure_output": "/media/groponp/Galvani/Scripts/Pypka/tests/fixtures/denv2_pH5.0/output_pypka/denv2_protonated_pH5.0.pdb, 5.0, charmm",
+    "titration_output": "/media/groponp/Galvani/Scripts/Pypka/tests/fixtures/denv2_pH5.0/output_pypka/denv2_titration.dat"
   },
-  "input_pdb": "/media/groponp/Galvani/Scripts/Pypka/tests/denv2.pdb",
+  "input_pdb": "/media/groponp/Galvani/Scripts/Pypka/tests/data/denv2.pdb",
   "target_ph": 5.0,
-  "generated": "2026-06-25T22:12:27.621308+00:00",
-  "command": "python AutoPypKa.py run denv2.pdb --ph 5.0 --epsin 15",
-  "epsin_rationale": "epsin=15 validated in PyPKA benchmark (521 residues from PKAD database); minimizes RMSE=0.82 (MAE=0.57) on diverse protein set. See Figure S3A of DOI: 10.1021/acs.jcim.0c00718."
+  "generated": "2026-07-09T12:21:22.800104+00:00"
 }

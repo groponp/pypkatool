@@ -1,5 +1,5 @@
-# PypKaTools v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=7.0
-# protein=7rsa_rnasea | date=2026-06-26 | input=7rsa.pdb
+# pypkatool v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=7.0
+# protein=7rsa_rnasea | date=2026-07-09 | input=7rsa.pdb
 # Reference: PyPKA DOI 10.1021/acs.jcim.0c00718 | Cross-validation: pKAI+ (ML)
 #
 # Only residues requiring CHARMM-GUI action are listed.
@@ -12,8 +12,8 @@
 ----------------------------------------------------------------------------------------------------
 RESNAME   RESID  CHAIN   PKA_PYPKA    %PROT  %DEPROT   PKA_PKAI+  CHARMM_LABEL    RTF  ACTION
 ----------------------------------------------------------------------------------------------------
-HIS          12      A        5.84     10.6     89.4        6.09  HSD             YES  RESI
-HIS          48      A        6.67     32.3     67.7        6.69  HSD             YES  RESI
-HIS         105      A        6.39     19.6     80.4        6.68  HSE             YES  RESI
-HIS         119      A        6.42     23.0     77.0        6.53  HSE             YES  RESI
+HIS          12      A        6.07     14.4     85.6        6.09  HSD             YES  RESI
+HIS          48      A        7.38     70.3     29.7        6.69  HSP             YES  RESI
+HIS         105      A        6.70     33.3     66.7        6.68  HSE             YES  RESI
+HIS         119      A        6.36     21.5     78.5        6.53  HSE             YES  RESI
 ----------------------------------------------------------------------------------------------------

@@ -1,0 +1,23 @@
+# Helper environment: the `pypkatool fixstructure` command shells out to
+# PDBFixer + OpenMM to repair a structurally incomplete PDB (missing atoms,
+# internal chain gaps) before it is handed to PyPKA.
+#
+# This has to be a separate environment from environment.yml: PDBFixer/OpenMM
+# require numpy>=2, while pypkatool's main environment pins numpy<2 for
+# delphi4py's compiled Poisson-Boltzmann backend. The two cannot coexist in
+# one environment.
+#
+# Create it with:
+#   conda env create -f environment-pdbfixer.yml
+#
+# You never activate this environment directly - pypkatool finds
+# `<this-env>/bin/python` automatically and runs the repair as a subprocess
+# (see pypkatool.core._find_pdbfixer_python / fix_structure).
+name: pdbfixer
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pdbfixer
+  - openmm

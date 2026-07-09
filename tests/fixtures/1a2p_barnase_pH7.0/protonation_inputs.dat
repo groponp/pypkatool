@@ -1,5 +1,5 @@
-# PypKaTools v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=7.0
-# protein=1a2p_barnase | date=2026-06-26 | input=1a2p.pdb
+# pypkatool v1.0.0 | engine=PyPKA | epsin=15 | ionicstr=0.1 | pH=7.0
+# protein=1a2p_barnase | date=2026-07-09 | input=1a2p.pdb
 # Reference: PyPKA DOI 10.1021/acs.jcim.0c00718 | Cross-validation: pKAI+ (ML)
 #
 # Only residues requiring CHARMM-GUI action are listed.
@@ -12,6 +12,6 @@
 ----------------------------------------------------------------------------------------------------
 RESNAME   RESID  CHAIN   PKA_PYPKA    %PROT  %DEPROT   PKA_PKAI+  CHARMM_LABEL    RTF  ACTION
 ----------------------------------------------------------------------------------------------------
-HIS          16      A        6.45     21.9     78.1        6.89  HSE             YES  RESI
-HIS         100      A        6.42     20.7     79.3        6.60  HSE             YES  RESI
+HIS          16      A        6.76     36.8     63.2        6.89  HSE             YES  RESI
+HIS         100      A        6.51     24.1     75.9        6.60  HSE             YES  RESI
 ----------------------------------------------------------------------------------------------------

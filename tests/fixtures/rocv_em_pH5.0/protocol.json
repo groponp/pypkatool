@@ -1,5 +1,5 @@
 {
-  "tool": "AutoPypKa",
+  "tool": "pypkatool",
   "engine": "PyPKA",
   "pypka_version": "2.10.0",
   "reference": "DOI: 10.1021/acs.jcim.0c00718",
@@ -10,12 +10,11 @@
     "convergence": 0.1,
     "pH": "0,14",
     "ncpus": 12,
-    "structure_output": "/media/groponp/Galvani/Scripts/Pypka/tests/autopypka_rocv_em_pH5.0/rocv_em_protonated_pH5.0.pdb, 5.0, charmm",
-    "titration_output": "/media/groponp/Galvani/Scripts/Pypka/tests/autopypka_rocv_em_pH5.0/rocv_em_titration.dat"
+    "ffID": "CHARMM36m",
+    "structure_output": "/media/groponp/Galvani/Scripts/Pypka/tests/fixtures/rocv_em_pH5.0/output_pypka/rocv_em_protonated_pH5.0.pdb, 5.0, charmm",
+    "titration_output": "/media/groponp/Galvani/Scripts/Pypka/tests/fixtures/rocv_em_pH5.0/output_pypka/rocv_em_titration.dat"
   },
-  "input_pdb": "/media/groponp/Galvani/Scripts/Pypka/tests/rocv_em.pdb",
+  "input_pdb": "/media/groponp/Galvani/Scripts/Pypka/tests/data/rocv_em.pdb",
   "target_ph": 5.0,
-  "generated": "2026-06-25T21:44:17.834982+00:00",
-  "command": "python AutoPypKa.py run rocv_em.pdb --ph 5.0 --epsin 15",
-  "epsin_rationale": "epsin=15 validated in PyPKA benchmark (521 residues from PKAD database); minimizes RMSE=0.82 (MAE=0.57) on diverse protein set. See Figure S3A of DOI: 10.1021/acs.jcim.0c00718."
+  "generated": "2026-07-09T13:04:02.096258+00:00"
 }

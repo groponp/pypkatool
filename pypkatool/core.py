@@ -143,6 +143,13 @@ DEFAULT_PARAMS: dict[str, Any] = {
     "epsin": 15, "ionicstr": 0.1, "pbc_dimensions": 0,
     "convergence": 0.1, "pH": "0,14",
     "ncpus": os.cpu_count() or 4,
+    # PyPKA defaults to ffID="G54A7" (GROMOS) / ffinput="GROMOS" when these are
+    # not set explicitly (see pypka/config.py Config.__init__). This tool's
+    # entire premise - the bundled top_all36_prot.rtf, the CHARMM RESI/PRES
+    # labels produced by _label(), and structure_output's "charmm" naming
+    # scheme - assumes the underlying PB+MC calculation itself used CHARMM36m
+    # charges/radii/tautomer .st files, not GROMOS ones. Must be set explicitly.
+    "ffID": "CHARMM36m",
 }
 
 @dataclass
@@ -381,8 +388,81 @@ def _inject_py27() -> None:
             os.environ["PATH"] = str(d) + ":" + os.environ.get("PATH","")
             return
 
+# ── fixstructure (PDBFixer, separate env) ─────────────────────────────────────
+
+#: Bundled worker script run inside the ``pdbfixer`` conda environment (see
+#: :func:`_find_pdbfixer_python`). Kept as a standalone script rather than an
+#: importable module because pdbfixer/OpenMM need numpy>=2, incompatible with
+#: this package's own numpy<2 (delphi4py) environment.
+_FIXSTRUCTURE_WORKER = Path(__file__).parent / "data" / "fixstructure_worker.py"
+
+def _find_pdbfixer_python() -> str:
+    """Locate the Python interpreter of a conda environment with pdbfixer installed.
+
+    Looks for a conda environment named ``pdbfixer`` (see
+    ``environment-pdbfixer.yml`` / the project README "Repairing fragmented
+    structures") under common conda roots. pdbfixer/OpenMM require numpy>=2,
+    which conflicts with delphi4py's numpy<2 pin, so this always runs as a
+    separate interpreter rather than an in-process import.
+
+    :returns: Path to the ``python`` executable inside the ``pdbfixer`` env.
+    :rtype: str
+    :raises SystemExit: if no such environment can be found.
+    """
+    for d in [Path.home() / "miniconda3/envs/pdbfixer/bin",
+              Path.home() / "anaconda3/envs/pdbfixer/bin",
+              Path(os.environ.get("HOME","/root")) / "miniconda3/envs/pdbfixer/bin"]:
+        if (d / "python").exists():
+            return str(d / "python")
+    sys.exit(
+        "fixstructure requires a separate conda environment with pdbfixer + openmm.\n"
+        "  conda create -n pdbfixer -c conda-forge python=3.11 pdbfixer openmm -y\n"
+        "See README.md 'Repairing fragmented structures'."
+    )
+
+def fix_structure(pdb_path: Path, outdir: Path | None = None) -> Path:
+    """Repair a structurally incomplete PDB using PDBFixer, before feeding it to PyPKA.
+
+    Delegates to :data:`_FIXSTRUCTURE_WORKER`, run under
+    :func:`_find_pdbfixer_python`, which:
+
+    * fills in missing heavy atoms for every residue that is present
+      (including at chain termini, e.g. a missing ``OXT``);
+    * rebuilds missing residues only when the gap is strictly internal to a
+      chain (a present residue on both sides) - a gap at the very start or
+      end of a chain is left untouched, since that reflects where the
+      deposited construct actually starts/ends, not damage to repair;
+    * never adds hydrogens, so the output stays heavy-atom-only like a
+      standard deposited PDB.
+
+    :param pdb_path: Input PDB to repair.
+    :type pdb_path: pathlib.Path
+    :param outdir: Directory for the output file. Defaults to ``pdb_path``'s
+        parent directory.
+    :type outdir: pathlib.Path | None
+    :returns: Path to the repaired PDB (``<stem>_fixed.pdb``).
+    :rtype: pathlib.Path
+    :raises SystemExit: if the ``pdbfixer`` environment is missing, or the
+        worker subprocess fails (e.g. on a PDB with no recognizable sequence).
+    """
+    import subprocess
+    outdir = outdir or pdb_path.parent
+    outdir.mkdir(parents=True, exist_ok=True)
+    out_pdb = outdir / f"{pdb_path.stem}_fixed.pdb"
+    python = _find_pdbfixer_python()
+    result = subprocess.run(
+        [python, str(_FIXSTRUCTURE_WORKER), "--pdb", str(pdb_path), "--output", str(out_pdb)],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        sys.exit(f"fixstructure failed:\n{result.stderr}")
+    print(f"  {result.stdout.strip()}")
+    return out_pdb
+
+
 def run_pypka(pdb_path: Path, target_ph: float, outdir: Path,
-              ncpus: int = 4, epsin: float = 15) -> tuple[list[SiteResult], Path]:
+              ncpus: int = 4, epsin: float = 15,
+              charmm_input: bool = False) -> tuple[list[SiteResult], Path]:
     """Run PyPKA (Poisson-Boltzmann + Monte Carlo) and collect per-site results.
 
     Writes PyPKA's raw output (protonated PDB, titration curve) under
@@ -402,9 +482,23 @@ def run_pypka(pdb_path: Path, target_ph: float, outdir: Path,
         (PyPKA's literature-optimized value; RMSE 0.82 / MAE 0.57 on the
         PKAD benchmark).
     :type epsin: float
+    :param charmm_input: Set ``ffinput="CHARMM"`` (PyPKA/pdbmender default is
+        ``"GROMOS"``). Only matters if ``pdb_path`` already carries CHARMM
+        protonation-state-specific residue names (``HSD``/``HSE``/``HSP``/
+        ``ASPP``/``GLUP``/``CYSM``/...) - e.g. a PDB re-exported from a
+        CHARMM-GUI PDB Reader step. Verified against every call site that
+        reads ``ffinput`` (``pdbmender/utils.py::identify_tit_sites``,
+        ``pypka/clean/cleaning.py`` x2): all three only fire on those exact
+        residue names, via ``pdbmender.ffconverter.CHARMM_protomers``. A
+        standard PDB (RCSB, AlphaFold, ...) never contains them, so this flag
+        is a no-op for the common case - it exists for the CHARMM-GUI
+        round-trip case only. Defaults to ``False``.
+    :type charmm_input: bool
     :returns: ``(sites, protonated_pdb_path)``.
     :rtype: tuple[list[SiteResult], pathlib.Path]
-    :raises SystemExit: if the ``pypka`` package is not installed.
+    :raises SystemExit: if the ``pypka`` package is not installed, or if
+        ``Titration()`` fails (most commonly a structurally incomplete PDB -
+        see the ``except Exception`` branch below).
     """
     try:
         from pypka import Titration
@@ -422,11 +516,30 @@ def run_pypka(pdb_path: Path, target_ph: float, outdir: Path,
         "structure_output": f"{prot_pdb}, {target_ph}, charmm",
         "titration_output": str(titration_out),
     }
+    if charmm_input:
+        params["ffinput"] = "CHARMM"
     _save_protocol(params, pdb_path, target_ph, outdir)
     _inject_py27()
     orig = os.getcwd(); os.chdir(raw_dir)   # PyPKA temp files land in output_pypka/
     try:
-        tit = Titration(params, sites="all")
+        try:
+            tit = Titration(params, sites="all")
+        except Exception as e:
+            # PyPKA raises bare Exceptions from deep inside pdbmender's cleanPDB()
+            # for structurally incomplete input (e.g. "CTR N has missing atoms" -
+            # a truncated C-terminus with no OXT/O2) with no indication of the
+            # fix. validate_pdb() cannot catch this upfront: it only checks that
+            # ATOM/HETATM records are well-formed, not that each residue has its
+            # expected atom set.
+            sys.exit(
+                f"PyPKA failed while preprocessing the structure:\n  {e}\n\n"
+                f"This usually means the PDB is structurally incomplete for at least\n"
+                f"one residue (most often a truncated terminus missing its O/OXT/OT2\n"
+                f"atoms, or a residue missing backbone/side-chain atoms). PyPKA does\n"
+                f"not repair missing heavy atoms - re-run on a structure that has been\n"
+                f"completed first (e.g. with PDBFixer, MODELLER, or your PDB's\n"
+                f"'*_clean.pdb' / repaired variant if one exists)."
+            )
     finally:
         os.chdir(orig)
 
@@ -1641,8 +1754,12 @@ def cmd_run(args: argparse.Namespace) -> None:
     print(f"  Input: {pdb_path}  epsin={args.epsin}  ncpus={args.ncpus}")
 
     print("\n[1/2] Running PyPKA (PB+MC)...")
+    charmm_input = getattr(args, "charmm_input", False)
     params = {**DEFAULT_PARAMS, "epsin": args.epsin, "ncpus": args.ncpus}
-    site_results, prot_pdb = run_pypka(pdb_path, ph, outdir, args.ncpus, args.epsin)
+    if charmm_input:
+        params["ffinput"] = "CHARMM"
+    site_results, prot_pdb = run_pypka(pdb_path, ph, outdir, args.ncpus, args.epsin,
+                                        charmm_input=charmm_input)
     print(f"      {len(site_results)} sites found. Protonated PDB → {prot_pdb.name}")
 
     print("\n[2/2] Mapping + reports...")
@@ -1703,6 +1820,20 @@ def cmd_reprocess(args: argparse.Namespace) -> None:
     for f in sorted(outdir.iterdir()): print(f"  {f.name}")
 
 
+def cmd_fixstructure(args: argparse.Namespace) -> None:
+    """Entry point for ``pypkatool fixstructure``: repair a PDB with PDBFixer.
+
+    :param args: Parsed CLI arguments (``pdb``, ``outdir``).
+    :type args: argparse.Namespace
+    :rtype: None
+    """
+    pdb_path = Path(args.pdb).resolve()
+    outdir = Path(args.outdir) if args.outdir else pdb_path.parent
+    print(f"\n{'='*60}\npypkatool fixstructure | {pdb_path.name}\n{'='*60}")
+    out_pdb = fix_structure(pdb_path, outdir)
+    print(f"\nDone. Repaired PDB: {out_pdb}")
+
+
 def main() -> None:
     """CLI entry point (console script ``pypkatool``).
 
@@ -1721,14 +1852,25 @@ def main() -> None:
     r.add_argument("--outdir", default=None)
     r.add_argument("--ncpus", type=int, default=os.cpu_count() or 4)
     r.add_argument("--epsin", type=float, default=15)
+    r.add_argument("--charmm-input", action="store_true", dest="charmm_input",
+        help="Set ffinput=CHARMM for PDBs that already carry CHARMM "
+             "protonation-state residue names (HSD/HSE/HSP/ASPP/GLUP/CYSM/...), "
+             "e.g. a structure re-exported from a CHARMM-GUI PDB Reader step. "
+             "No effect on a standard PDB (RCSB/AlphaFold/...); default is off.")
 
     rp = sub.add_parser("reprocess", help="Regenerate outputs from existing partial run")
     rp.add_argument("outdir"); rp.add_argument("--ph", type=float, required=True)
     rp.add_argument("--pdb", default=None); rp.add_argument("--epsin", type=float, default=15)
 
+    fs = sub.add_parser("fixstructure",
+        help="Repair missing atoms/internal-gap residues in a PDB with PDBFixer "
+             "(separate 'pdbfixer' conda env) before running it through pypkatool")
+    fs.add_argument("pdb"); fs.add_argument("--outdir", default=None)
+
     args = p.parse_args()
     if args.command == "run": cmd_run(args)
     elif args.command == "reprocess": cmd_reprocess(args)
+    elif args.command == "fixstructure": cmd_fixstructure(args)
     else: p.print_help()
 
 if __name__ == "__main__":
