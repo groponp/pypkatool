@@ -181,14 +181,21 @@ installed PyPKA source, `titsite.py::Titsite.getRefProtState()`, and against
 the signed atomic partial charges in the CHARMM36 `.st` tautomer files):
 
 * **Cationic sites** (`HIS`, `LYS`, `NTR`): the reference tautomer is the
-  **protonated**, positively charged state. It is also the CHARMM *default*
-  RESI (`LYS`, `NTER`) - no patch needed. The regular tautomers are the
-  neutral forms and need a patch (`LSN`, `NNEU`).
+  **protonated**, positively charged state. For `LYS` that is the CHARMM
+  *default* `RESI` - no patch needed. `NTR`'s reference state maps to
+  `NTER`, which - unlike `LYS` - is a `PRES` in the RTF, not a `RESI` (a
+  chain's N-terminus is always applied as a patch on its first residue, it
+  is never a standalone residue); it is, however, the *default* terminal
+  patch CHARMM-GUI's PDB Reader applies automatically, so no explicit action
+  is needed there either. The regular tautomers are the neutral forms and
+  need an explicit patch (`LSN`, `NNEU`).
 * **Anionic sites** (`ASP`, `GLU`, `CTR`, `CYS`, `TYR`, `SER`): the reference
   tautomer is the **deprotonated**, negatively charged state.
-  * For `ASP`/`GLU`/`CTR`, that deprotonated/charged form *is* the CHARMM
-    default RESI (`ASP`, `GLU`, `CTER`) - no patch needed; the protonated
-    form needs a patch (`ASPP`, `GLUP`, `CNEU`).
+  * For `ASP`/`GLU`, that deprotonated/charged form *is* the CHARMM default
+    `RESI` - no patch needed; the protonated form needs a patch (`ASPP`,
+    `GLUP`). `CTR`'s reference state maps to `CTER`, which - like `NTER` -
+    is a `PRES`, not a `RESI`, but is the default C-terminal patch applied
+    automatically, so no explicit action is needed there either.
   * For `CYS`/`TYR`/`SER` it's the opposite: the CHARMM default RESI is the
     *protonated*, neutral form (`CYS`, `TYR`, `SER`), so the deprotonated
     reference state is the one needing a patch (`CYSD`, `TYRD`, `SERD`).

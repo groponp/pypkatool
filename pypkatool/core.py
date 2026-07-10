@@ -725,13 +725,20 @@ def _label(resname: str, mpt: int, n_reg: int, site_type: str) -> str:
     module-level convention (verified against ``getRefProtState()`` in the
     PyPKA source and the CHARMM36 ``.st`` tautomer charge sets):
 
-    * Cationic (``site_type == "c"``): reference = protonated =
-      the CHARMM *default* RESI (``LYS``, ``NTER``) - no patch needed.
-      Non-reference = neutral = needs a patch (``LSN``, ``NNEU``).
+    * Cationic (``site_type == "c"``): reference = protonated. For ``LYS``
+      that is the CHARMM *default* RESI - no patch needed. For ``NTR`` the
+      reference maps to ``NTER``, which - unlike ``LYS`` - is a ``PRES`` in
+      the RTF, not a ``RESI`` (a chain's N-terminus is always applied as a
+      patch on its first residue); it is, however, the default terminal
+      patch CHARMM-GUI's PDB Reader applies automatically, so no explicit
+      action is needed there either. Non-reference = neutral = needs a
+      patch (``LSN``, ``NNEU``).
     * Anionic (``site_type == "a"``): reference = deprotonated. For
-      ``ASP``/``GLU``/``CTR`` the deprotonated, charged form *is* the CHARMM
-      default RESI (``ASP``, ``GLU``, ``CTER``) - no patch needed; the
-      protonated form needs a patch (``ASPP``, ``GLUP``, ``CNEU``). For
+      ``ASP``/``GLU`` the deprotonated, charged form *is* the CHARMM
+      default RESI - no patch needed; the protonated form needs a patch
+      (``ASPP``, ``GLUP``). For ``CTR`` the reference maps to ``CTER``,
+      which - like ``NTER`` - is a ``PRES``, not a ``RESI``, but is the
+      default C-terminal patch applied automatically. For
       ``CYS``/``TYR``/``SER`` it is the opposite: the CHARMM default RESI is
       the *protonated* neutral form (``CYS``, ``TYR``, ``SER``), so the
       deprotonated reference state is the one that needs a patch
