@@ -25,9 +25,16 @@ references:
       Calculations
     authors:
       - family-names: Reis
-        given-names: P. B. P. S.
+        given-names: Pedro B. P. S.
+      - family-names: Vila-Viçosa
+        given-names: Diogo
+      - family-names: Rocchia
+        given-names: Walter
+      - family-names: Machuqueiro
+        given-names: Miguel
     journal: Journal of Chemical Information and Modeling
     volume: 60
+    issue: 10
     start: 4442
     end: 4448
     year: 2020
@@ -38,18 +45,22 @@ references:
       Electrostatics-Driven pKa Predictions in Proteins
     authors:
       - family-names: Reis
-        given-names: P. B. P. S.
+        given-names: Pedro B. P. S.
       - family-names: Bertolini
-        given-names: M.
+        given-names: Marco
       - family-names: Montanari
-        given-names: F.
+        given-names: Floriane
+      - family-names: Rocchia
+        given-names: Walter
+      - family-names: Machuqueiro
+        given-names: Miguel
       - family-names: Clevert
-        given-names: D.-A.
+        given-names: Djork-Arné
     journal: Journal of Chemical Theory and Computation
     volume: 18
-    issue: 6
-    start: 3925
-    end: 3935
+    issue: 8
+    start: 5068
+    end: 5078
     year: 2022
     doi: 10.1021/acs.jctc.2c00308
   - type: article
@@ -59,9 +70,19 @@ references:
       chi1 and chi2 Dihedral Angles
     authors:
       - family-names: Best
-        given-names: R. B.
+        given-names: Robert B.
+      - family-names: Zhu
+        given-names: Xiao
+      - family-names: Shim
+        given-names: Jihyun
+      - family-names: Lopes
+        given-names: Pedro E. M.
+      - family-names: Mittal
+        given-names: Jeetain
+      - family-names: Feig
+        given-names: Michael
       - family-names: MacKerell
-        given-names: A. D.
+        given-names: Alexander D.
         name-suffix: Jr.
     journal: Journal of Chemical Theory and Computation
     volume: 8
@@ -74,9 +95,21 @@ references:
     title: "CHARMM36m: An improved force field for folded and intrinsically disordered proteins"
     authors:
       - family-names: Huang
-        given-names: J.
+        given-names: Jing
+      - family-names: Rauscher
+        given-names: Sarah
+      - family-names: Nawrocki
+        given-names: Grzegorz
+      - family-names: Ran
+        given-names: Ting
+      - family-names: Feig
+        given-names: Michael
+      - family-names: de Groot
+        given-names: Bert L.
+      - family-names: Grubmüller
+        given-names: Helmut
       - family-names: MacKerell
-        given-names: A. D.
+        given-names: Alexander D.
         name-suffix: Jr.
     journal: Nature Methods
     volume: 14

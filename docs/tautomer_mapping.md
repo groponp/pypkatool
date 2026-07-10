@@ -1,11 +1,21 @@
 # How the tautomer -> CHARMM label mapping works
 
 PyPKA reports, per titratable site, the most probable *tautomer* out of `N`
-regular tautomers plus one *reference* tautomer (index `N+1`). Which physical
-state that reference tautomer represents depends on site polarity - this is
-easy to get backwards, so it's worth stating precisely (verified against the
-installed PyPKA source, `titsite.py::Titsite.getRefProtState()`, and against
-the signed atomic partial charges in the CHARMM36 `.st` tautomer files):
+regular tautomers plus one *reference* tautomer (index `N+1`). "Reference" is
+PyPKA's own internal term for this `N+1`-th slot (`titsite.py::getTautomers()`
+docstring: "all tautomers instances except the tautomers of reference") - it
+is not a CHARMM or RTF concept, and the RTF file itself never marks any RESI
+or PRES block as a "reference" of anything. `pypkatool` is what connects the
+two vocabularies: it reads which of PyPKA's tautomer indices won at the
+target pH, and `_label()` maps that index to a concrete CHARMM label (e.g.
+the reference tautomer maps to `HSP` for HIS - but `HSP` in the RTF is just
+an ordinary `RESI` block like any other, with no special "reference" marker).
+
+Which physical state the reference tautomer represents depends on site
+polarity - this is easy to get backwards, so it's worth stating precisely
+(verified against the installed PyPKA source,
+`titsite.py::Titsite.getRefProtState()`, and against the signed atomic
+partial charges in the CHARMM36 `.st` tautomer files):
 
 * **Cationic sites** (`HIS`, `LYS`, `NTR`): the reference tautomer is the
   **protonated**, positively charged state. For `LYS` that is the CHARMM

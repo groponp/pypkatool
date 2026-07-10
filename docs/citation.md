@@ -2,9 +2,11 @@
 
 ## References
 
-- PyPKA: Reis, P. B. P. S. et al. *J. Chem. Inf. Model.* 2020, 60, 4442-4448.
+- PyPKA: Reis, P. B. P. S.; Vila-Viçosa, D.; Rocchia, W.; Machuqueiro, M.
+  *J. Chem. Inf. Model.* 2020, 60 (10), 4442-4448.
   [DOI: 10.1021/acs.jcim.0c00718](https://doi.org/10.1021/acs.jcim.0c00718)
-- pKAI / pKAI+: Reis, P. B. P. S. et al. *J. Chem. Theory Comput.* 2022, 18, 3925-3935.
+- pKAI / pKAI+: Reis, P. B. P. S.; Bertolini, M.; Montanari, F.; Rocchia, W.;
+  Machuqueiro, M.; Clevert, D.-A. *J. Chem. Theory Comput.* 2022, 18 (8), 5068-5078.
   [DOI: 10.1021/acs.jctc.2c00308](https://doi.org/10.1021/acs.jctc.2c00308)
 - CHARMM36: Best, R. B.; Zhu, X.; Shim, J.; Lopes, P. E. M.; Mittal, J.;
   Feig, M.; MacKerell, A. D. Jr. *J. Chem. Theory Comput.* 2012, 8 (9),

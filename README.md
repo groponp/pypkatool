@@ -174,11 +174,21 @@ round-trip case.
 ## How the tautomer -> CHARMM label mapping works
 
 PyPKA reports, per titratable site, the most probable *tautomer* out of `N`
-regular tautomers plus one *reference* tautomer (index `N+1`). Which physical
-state that reference tautomer represents depends on site polarity - this is
-easy to get backwards, so it's worth stating precisely (verified against the
-installed PyPKA source, `titsite.py::Titsite.getRefProtState()`, and against
-the signed atomic partial charges in the CHARMM36 `.st` tautomer files):
+regular tautomers plus one *reference* tautomer (index `N+1`). "Reference" is
+PyPKA's own internal term for this `N+1`-th slot (`titsite.py::getTautomers()`
+docstring: "all tautomers instances except the tautomers of reference") - it
+is not a CHARMM or RTF concept, and the RTF file itself never marks any RESI
+or PRES block as a "reference" of anything. `pypkatool` is what connects the
+two vocabularies: it reads which of PyPKA's tautomer indices won at the
+target pH, and `_label()` maps that index to a concrete CHARMM label (e.g.
+the reference tautomer maps to `HSP` for HIS - but `HSP` in the RTF is just
+an ordinary `RESI` block like any other, with no special "reference" marker).
+
+Which physical state the reference tautomer represents depends on site
+polarity - this is easy to get backwards, so it's worth stating precisely
+(verified against the installed PyPKA source,
+`titsite.py::Titsite.getRefProtState()`, and against the signed atomic
+partial charges in the CHARMM36 `.st` tautomer files):
 
 * **Cationic sites** (`HIS`, `LYS`, `NTR`): the reference tautomer is the
   **protonated**, positively charged state. For `LYS` that is the CHARMM
@@ -365,9 +375,11 @@ and is never imported by `pypkatool` itself.
 
 ## References
 
-- PyPKA: Reis, P. B. P. S. et al. *J. Chem. Inf. Model.* 2020, 60, 4442-4448.
+- PyPKA: Reis, P. B. P. S.; Vila-Viçosa, D.; Rocchia, W.; Machuqueiro, M.
+  *J. Chem. Inf. Model.* 2020, 60 (10), 4442-4448.
   [DOI: 10.1021/acs.jcim.0c00718](https://doi.org/10.1021/acs.jcim.0c00718)
-- pKAI / pKAI+: Reis, P. B. P. S. et al. *J. Chem. Theory Comput.* 2022, 18, 3925-3935.
+- pKAI / pKAI+: Reis, P. B. P. S.; Bertolini, M.; Montanari, F.; Rocchia, W.;
+  Machuqueiro, M.; Clevert, D.-A. *J. Chem. Theory Comput.* 2022, 18 (8), 5068-5078.
   [DOI: 10.1021/acs.jctc.2c00308](https://doi.org/10.1021/acs.jctc.2c00308)
 - CHARMM36: Best, R. B.; Zhu, X.; Shim, J.; Lopes, P. E. M.; Mittal, J.;
   Feig, M.; MacKerell, A. D. Jr. *J. Chem. Theory Comput.* 2012, 8 (9),

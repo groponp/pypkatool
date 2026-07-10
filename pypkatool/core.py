@@ -9,9 +9,15 @@ titratable site's most probable tautomer onto a CHARMM36 residue/patch label
 (``HSD``/``HSE``/``HSP``, ``ASPP``, ``GLUP``, ``LSN``, ``CNEU``, ``CYSD``,
 ``TYRD``, ``SERD``, ...), and writes a CHARMM-GUI-ready protonation table.
 
-**Tautomer reference-state convention** (verified against the installed
-PyPKA source, ``titsite.py::Titsite.getRefProtState()``, and against the
-signed atomic partial charges in the CHARMM36 ``.st`` tautomer files):
+**Tautomer reference-state convention.** "Reference" is PyPKA's own internal
+term for tautomer index ``N + 1`` (``titsite.py::getTautomers()`` docstring:
+"all tautomers instances except the tautomers of reference") - it is not a
+CHARMM or RTF concept; the bundled RTF never marks any RESI/PRES block as a
+"reference" of anything. ``_label()`` is what connects the two vocabularies,
+mapping the winning PyPKA tautomer index to a plain CHARMM label (verified
+against the installed PyPKA source, ``titsite.py::Titsite.getRefProtState()``,
+and against the signed atomic partial charges in the CHARMM36 ``.st``
+tautomer files):
 
 * Cationic sites (``HIS``, ``LYS``, ``NTR``) - the *reference* tautomer
   (index ``N + 1``, where ``N`` is the number of regular tautomers) is the
