@@ -72,5 +72,5 @@ and forget":
 
 ```bash
 conda activate pypkatool
-pypkatool run my_protein.pdb --ph 7.0
+pypkatool run my_protein.pdb --pH 7.0
 ```

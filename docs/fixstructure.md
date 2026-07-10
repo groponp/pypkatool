@@ -32,7 +32,7 @@ never part of the deposited structure:
 ```bash
 pypkatool fixstructure my_protein.pdb --outdir results/
 # -> results/my_protein_fixed.pdb
-pypkatool run results/my_protein_fixed.pdb --ph 7.0
+pypkatool run results/my_protein_fixed.pdb --pH 7.0
 ```
 
 AlphaFold2/ColabFold predictions are heavy-atom-only (no hydrogens) and, for

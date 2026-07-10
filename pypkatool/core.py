@@ -32,9 +32,9 @@ default" might suggest for anionic sites, and it is easy to get backwards -
 see :func:`_label` for the full mapping table.
 
 Usage:
-    ``pypkatool run <pdb> --ph <float> [--outdir <dir>] [--ncpus N] [--epsin F]``
+    ``pypkatool run <pdb> --pH <float> [--outdir <dir>] [--ncpus N] [--epsin F]``
 
-    ``pypkatool reprocess <outdir> --ph <float> [--pdb <pdb>]``
+    ``pypkatool reprocess <outdir> --pH <float> [--pdb <pdb>]``
 
 :seealso: PyPKA DOI 10.1021/acs.jcim.0c00718; pKAI/pKAI+ DOI
     10.1021/acs.jctc.2c00308.
@@ -1756,14 +1756,14 @@ def _post(mapped_raw: list[SiteResult], prot_pdb: Path, pdb_path: Path,
 def cmd_run(args: argparse.Namespace) -> None:
     """Entry point for ``pypkatool run``: full PyPKA + mapping + reports pipeline.
 
-    :param args: Parsed CLI arguments (``pdb``, ``ph``, ``outdir``, ``ncpus``, ``epsin``).
+    :param args: Parsed CLI arguments (``pdb``, ``pH``, ``outdir``, ``ncpus``, ``epsin``).
     :type args: argparse.Namespace
     :rtype: None
     """
     pdb_path = Path(args.pdb).resolve()
     print("\n[0/2] Validating PDB...")
     validate_pdb(pdb_path)
-    ph: float = args.ph
+    ph: float = args.pH
     outdir = Path(args.outdir) if args.outdir else pdb_path.parent / f"pypkatool_{pdb_path.stem}_pH{ph}"
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -1801,14 +1801,14 @@ def cmd_reprocess(args: argparse.Namespace) -> None:
     but a later stage failed, or to regenerate reports at a different pH
     without rerunning PyPKA (the titration curve already covers pH 0-14).
 
-    :param args: Parsed CLI arguments (``outdir``, ``ph``, ``pdb``, ``epsin``).
+    :param args: Parsed CLI arguments (``outdir``, ``pH``, ``pdb``, ``epsin``).
     :type args: argparse.Namespace
     :raises SystemExit: if ``outdir`` or its expected PyPKA output files are missing.
     :rtype: None
     """
     outdir = Path(args.outdir).resolve()
     if not outdir.exists(): sys.exit(f"ERROR: outdir not found: {outdir}")
-    ph: float = args.ph
+    ph: float = args.pH
 
     # Search output_pypka/ first (new layout), then outdir root (legacy)
     raw_dir = outdir / "output_pypka"
@@ -1865,7 +1865,7 @@ def main() -> None:
     sub = p.add_subparsers(dest="command")
 
     r = sub.add_parser("run", help="Run full pipeline on one PDB")
-    r.add_argument("pdb"); r.add_argument("--ph", type=float, required=True)
+    r.add_argument("pdb"); r.add_argument("--pH", type=float, required=True)
     r.add_argument("--outdir", default=None)
     r.add_argument("--ncpus", type=int, default=os.cpu_count() or 4)
     r.add_argument("--epsin", type=float, default=15)
@@ -1876,7 +1876,7 @@ def main() -> None:
              "No effect on a standard PDB (RCSB/AlphaFold/...); default is off.")
 
     rp = sub.add_parser("reprocess", help="Regenerate outputs from existing partial run")
-    rp.add_argument("outdir"); rp.add_argument("--ph", type=float, required=True)
+    rp.add_argument("outdir"); rp.add_argument("--pH", type=float, required=True)
     rp.add_argument("--pdb", default=None); rp.add_argument("--epsin", type=float, default=15)
 
     fs = sub.add_parser("fixstructure",

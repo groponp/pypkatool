@@ -5,6 +5,13 @@ All notable changes to `pypkatool` are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- **Breaking**: the `--ph` flag on `run` and `reprocess` is renamed to
+  `--pH` (matching standard pKa/pH notation). Scripts calling `pypkatool`
+  need updating; the old lowercase `--ph` is no longer accepted.
+
 ## [1.0.0] - 2026-07-09
 
 ### Added
