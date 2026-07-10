@@ -17,6 +17,11 @@ Policy (see README.md "Repairing fragmented structures"):
     command never *extends* a chain, only repairs holes inside it.
   * No hydrogens are added, so the output stays heavy-atom-only, matching
     the convention of a standard deposited PDB.
+  * By default, only the protein (and DNA/RNA, if present) is kept in the
+    output - waters, ions, ligands, and other heterogens (HETATM records
+    not part of the polymer) are dropped via PDBFixer's own
+    `removeHeterogens(keepWater=False)`. Pass --keep-heterogens to keep
+    them. This runs before gap/atom repair and has no effect on it.
 
 Two mutually exclusive input modes:
   * --pdb-file: repair a local PDB file as-is.
@@ -43,7 +48,7 @@ from openmm.app import PDBFile
 
 
 def fix(pdb_out: str, pdb_file: str | None = None, pdb_id: str | None = None,
-        select_chains: list[str] | None = None) -> dict:
+        select_chains: list[str] | None = None, keep_heterogens: bool = False) -> dict:
     fixer = PDBFixer(filename=pdb_file) if pdb_file else PDBFixer(pdbid=pdb_id)
 
     if select_chains:
@@ -58,6 +63,10 @@ def fix(pdb_out: str, pdb_file: str | None = None, pdb_id: str | None = None,
         to_remove = present - requested
         if to_remove:
             fixer.removeChains(chainIds=list(to_remove))
+
+    n_heterogens_removed = 0
+    if not keep_heterogens:
+        n_heterogens_removed = len(fixer.removeHeterogens(keepWater=False))
 
     if not fixer.sequences:
         source = pdb_file if pdb_file else f"RCSB entry {pdb_id}"
@@ -98,6 +107,7 @@ def fix(pdb_out: str, pdb_file: str | None = None, pdb_id: str | None = None,
     return {
         "internal_residues_added": n_internal_residues_added,
         "residues_with_missing_atoms_filled": n_missing_atom_residues,
+        "heterogens_removed": n_heterogens_removed,
         "terminal_gaps_left_untouched": {
             f"chain_{k[0]}_pos_{k[1]}": v for k, v in dropped_terminal.items()
         },
@@ -112,10 +122,13 @@ def main() -> None:
     p.add_argument("--output", required=True)
     p.add_argument("--select-chains", default=None,
         help="Comma-separated chain IDs to keep, e.g. A,B,C. All other chains are dropped.")
+    p.add_argument("--keep-heterogens", action="store_true",
+        help="Keep waters, ions, ligands, and other non-polymer HETATM records in the "
+             "output. By default they are dropped (protein/DNA/RNA only).")
     args = p.parse_args()
     select_chains = args.select_chains.split(",") if args.select_chains else None
     summary = fix(args.output, pdb_file=args.pdb_file, pdb_id=args.pdb_id,
-                  select_chains=select_chains)
+                  select_chains=select_chains, keep_heterogens=args.keep_heterogens)
     print(json.dumps(summary))
 
 

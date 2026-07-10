@@ -13,6 +13,11 @@ and this project uses [Semantic Versioning](https://semver.org/).
 - `--pdb-id` on `fixstructure`: downloads and repairs a structure directly
   from RCSB instead of a local file. Always carries the official `SEQRES`,
   so internal-gap detection is reliable by construction.
+- `fixstructure` now drops all heterogens (waters, ions, ligands, other
+  non-polymer `HETATM` records) by default via PDBFixer's own
+  `removeHeterogens(keepWater=False)`, keeping only the repaired protein
+  (and DNA/RNA, if present). `--keep-heterogens` restores the previous
+  behavior of keeping them.
 
 ### Changed
 - **Breaking**: `fixstructure`'s input is now `--pdb-file <path>` or

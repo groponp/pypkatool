@@ -55,3 +55,4 @@ Exactly one of `--pdb-file`/`--pdb-id` is required.
 | `--pdb-id` | - | 4-char RCSB code to download and repair instead of a local file - always carries the official `SEQRES` (see {doc}`fixstructure`) |
 | `--outdir` | `--pdb-file`'s parent directory, or cwd for `--pdb-id` | Where to write `<stem-or-pdb_id>_fixed.pdb` |
 | `--select-chains` | all chains kept | Comma-separated chain IDs to keep (e.g. `A,B,C`); every other chain is dropped before repair |
+| `--keep-heterogens` | off | Keep waters/ions/ligands/other non-polymer `HETATM` records; by default they are dropped (protein/DNA/RNA only) |

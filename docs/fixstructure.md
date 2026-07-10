@@ -22,6 +22,10 @@ never part of the deposited structure:
 3. **No hydrogens are added.** The output stays heavy-atom-only, the same
    convention as a standard deposited PDB (and the form PyPKA's own cleaning
    step expects as input).
+4. **Only the protein (and DNA/RNA, if present) is kept by default.**
+   Waters, ions, ligands, and any other heterogen are dropped - pass
+   `--keep-heterogens` to keep them. This is independent of the atom/gap
+   repair above; it just controls what ends up in the output file.
 
 | Input residue state | Chain position | Result |
 |---|---|---|
@@ -48,6 +52,19 @@ pypkatool run results/my_protein_fixed.pdb --pH 7.0
 `--select-chains A,B,C` keeps only the listed chains (everything else is
 dropped) before repair, for either input mode - useful for a large
 multi-copy deposition where only some chains/subunits are wanted.
+
+## Non-protein atoms are dropped by default
+
+A deposited structure commonly ships with crystallographic waters,
+cryoprotectant/buffer ions, and bound ligands or glycans (`HETATM` records
+that are not part of the protein/DNA/RNA polymer). `fixstructure` drops all
+of these by default, keeping only the repaired protein - the intent is a
+clean structure ready for `pypkatool run`, not a faithful copy of everything
+in the deposition. Pass `--keep-heterogens` to keep them instead:
+
+```bash
+pypkatool fixstructure --pdb-id 7A3S --keep-heterogens --outdir results/
+```
 
 AlphaFold2/ColabFold predictions are heavy-atom-only (no hydrogens) and, for
 the residue range you gave the model, have no internal gaps or missing
@@ -98,4 +115,6 @@ first present residue in its chain (N-terminal gap), and
 (C-terminal gap) - both are filtered out before `addMissingAtoms()` is
 called, so only strictly internal gaps (`0 < position < len(...)`) get
 rebuilt. `--select-chains` is implemented with PDBFixer's own
-`removeChains(chainIds=...)`, applied before gap/atom detection.
+`removeChains(chainIds=...)`, applied before gap/atom detection. Dropping
+heterogens (the default) uses PDBFixer's own
+`removeHeterogens(keepWater=False)`.
