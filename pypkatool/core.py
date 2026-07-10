@@ -426,7 +426,8 @@ def _find_pdbfixer_python() -> str:
         "See README.md 'Repairing fragmented structures'."
     )
 
-def fix_structure(pdb_path: Path, outdir: Path | None = None) -> Path:
+def fix_structure(pdb_path: Path, outdir: Path | None = None,
+                   pdbid: str | None = None) -> Path:
     """Repair a structurally incomplete PDB using PDBFixer, before feeding it to PyPKA.
 
     Delegates to :data:`_FIXSTRUCTURE_WORKER`, run under
@@ -441,11 +442,27 @@ def fix_structure(pdb_path: Path, outdir: Path | None = None) -> Path:
     * never adds hydrogens, so the output stays heavy-atom-only like a
       standard deposited PDB.
 
+    Detecting internal gaps requires a reference sequence to compare the
+    chain against (PDBFixer's ``findMissingResidues()``), which by default
+    comes only from ``SEQRES`` records in ``pdb_path``. A PDB with no
+    ``SEQRES`` (common for hand-edited/stripped structures) gives PDBFixer
+    nothing to compare against - confirmed directly: on such a file
+    ``fixer.sequences`` is empty and ``findMissingResidues()`` returns
+    ``{}`` even when real internal gaps are present, so none get repaired.
+    Pass ``pdbid`` to fetch the deposited ``SEQRES`` from RCSB as a
+    substitute reference sequence in that case (atoms/coordinates still
+    come from ``pdb_path`` - only the reference sequence used for gap
+    detection comes from RCSB).
+
     :param pdb_path: Input PDB to repair.
     :type pdb_path: pathlib.Path
     :param outdir: Directory for the output file. Defaults to ``pdb_path``'s
         parent directory.
     :type outdir: pathlib.Path | None
+    :param pdbid: 4-character RCSB PDB code to fetch the reference sequence
+        from. Only needed when ``pdb_path`` has no ``SEQRES`` records and
+        internal gaps need detecting. Requires network access.
+    :type pdbid: str | None
     :returns: Path to the repaired PDB (``<stem>_fixed.pdb``).
     :rtype: pathlib.Path
     :raises SystemExit: if the ``pdbfixer`` environment is missing, or the
@@ -456,13 +473,23 @@ def fix_structure(pdb_path: Path, outdir: Path | None = None) -> Path:
     outdir.mkdir(parents=True, exist_ok=True)
     out_pdb = outdir / f"{pdb_path.stem}_fixed.pdb"
     python = _find_pdbfixer_python()
-    result = subprocess.run(
-        [python, str(_FIXSTRUCTURE_WORKER), "--pdb", str(pdb_path), "--output", str(out_pdb)],
-        capture_output=True, text=True,
-    )
+    cmd = [python, str(_FIXSTRUCTURE_WORKER), "--pdb", str(pdb_path), "--output", str(out_pdb)]
+    if pdbid:
+        cmd += ["--pdbid", pdbid]
+    result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         sys.exit(f"fixstructure failed:\n{result.stderr}")
-    print(f"  {result.stdout.strip()}")
+    try:
+        summary = json.loads(result.stdout.strip())
+    except json.JSONDecodeError:
+        print(f"  {result.stdout.strip()}")
+        return out_pdb
+    print(f"  internal_residues_added: {summary.get('internal_residues_added')}")
+    print(f"  residues_with_missing_atoms_filled: {summary.get('residues_with_missing_atoms_filled')}")
+    if summary.get("terminal_gaps_left_untouched"):
+        print(f"  terminal_gaps_left_untouched: {summary['terminal_gaps_left_untouched']}")
+    if summary.get("warning"):
+        print(f"  WARNING: {summary['warning']}")
     return out_pdb
 
 
@@ -1840,14 +1867,14 @@ def cmd_reprocess(args: argparse.Namespace) -> None:
 def cmd_fixstructure(args: argparse.Namespace) -> None:
     """Entry point for ``pypkatool fixstructure``: repair a PDB with PDBFixer.
 
-    :param args: Parsed CLI arguments (``pdb``, ``outdir``).
+    :param args: Parsed CLI arguments (``pdb``, ``outdir``, ``pdbid``).
     :type args: argparse.Namespace
     :rtype: None
     """
     pdb_path = Path(args.pdb).resolve()
     outdir = Path(args.outdir) if args.outdir else pdb_path.parent
     print(f"\n{'='*60}\npypkatool fixstructure | {pdb_path.name}\n{'='*60}")
-    out_pdb = fix_structure(pdb_path, outdir)
+    out_pdb = fix_structure(pdb_path, outdir, pdbid=getattr(args, "pdbid", None))
     print(f"\nDone. Repaired PDB: {out_pdb}")
 
 
@@ -1883,6 +1910,13 @@ def main() -> None:
         help="Repair missing atoms/internal-gap residues in a PDB with PDBFixer "
              "(separate 'pdbfixer' conda env) before running it through pypkatool")
     fs.add_argument("pdb"); fs.add_argument("--outdir", default=None)
+    fs.add_argument("--pdbid", default=None,
+        help="4-char RCSB PDB code to fetch the reference sequence from. Needed "
+             "to detect internal chain gaps when the input PDB has no SEQRES "
+             "records (common for hand-edited/stripped test files) - without "
+             "this, PDBFixer has nothing to compare the chain against and "
+             "silently repairs 0 internal gaps even if real ones exist. "
+             "Requires network access.")
 
     args = p.parse_args()
     if args.command == "run": cmd_run(args)

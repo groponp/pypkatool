@@ -7,10 +7,23 @@ and this project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- `--pdbid` flag on `fixstructure`: fetches the deposited `SEQRES` from
+  RCSB as a reference sequence for internal-gap detection, for PDBs that
+  have no `SEQRES` records of their own (confirmed: without this,
+  PDBFixer's `findMissingResidues()` has nothing to compare the chain
+  against and silently repairs 0 internal gaps, even real ones).
+
 ### Changed
 - **Breaking**: the `--ph` flag on `run` and `reprocess` is renamed to
   `--pH` (matching standard pKa/pH notation). Scripts calling `pypkatool`
   need updating; the old lowercase `--ph` is no longer accepted.
+
+### Fixed
+- `fixstructure` now prints an explicit `WARNING` when it cannot detect
+  internal gaps at all (no `SEQRES` and no `--pdbid`), instead of silently
+  reporting `internal_residues_added: 0` with no indication that this
+  might mean "couldn't check" rather than "nothing missing".
 
 ## [1.0.0] - 2026-07-09
 

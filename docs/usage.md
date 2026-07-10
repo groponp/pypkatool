@@ -48,3 +48,4 @@ pypkatool run examples/denv2.pdb --pH 5.0
 |---|---|---|
 | `pdb` | *(required)* | Input structure to repair |
 | `--outdir` | input PDB's parent directory | Where to write `<stem>_fixed.pdb` |
+| `--pdbid` | off | 4-char RCSB code to fetch a reference sequence from, for detecting internal chain gaps in a PDB with no `SEQRES` records (see {doc}`fixstructure`) |

@@ -141,6 +141,7 @@ pypkatool run examples/denv2.pdb --pH 5.0
 |---|---|---|
 | `pdb` | *(required)* | Input structure to repair |
 | `--outdir` | input PDB's parent directory | Where to write `<stem>_fixed.pdb` |
+| `--pdbid` | off | 4-char RCSB code to fetch a reference sequence from, for detecting internal chain gaps in a PDB with no `SEQRES` records (see ["Repairing fragmented structures"](#repairing-fragmented-structures)) |
 
 ## Force field parameters used for the PB+MC calculation
 
@@ -265,6 +266,32 @@ the residue range you gave the model, have no internal gaps or missing
 atoms by construction - `fixstructure` is normally unnecessary for them.
 It is intended for experimentally determined structures with genuine
 crystallographic disorder or truncated regions.
+
+### Internal gaps require a reference sequence - `--pdbid`
+
+Detecting an internal gap means comparing the chain's actual residues
+against what *should* be there, and PDBFixer's `findMissingResidues()` gets
+that reference sequence only from `SEQRES` records in the input PDB. A PDB
+with no `SEQRES` (common for hand-edited or programmatically stripped test
+files) gives PDBFixer nothing to compare against - confirmed directly:
+`PDBFixer(filename=...).sequences` is `[]` on such a file, and
+`findMissingResidues()` returns `{}` regardless of how many residues are
+actually missing. **This means `fixstructure` silently reports 0 internal
+gaps repaired on a `SEQRES`-less PDB, even when real gaps are present** - it
+now also prints an explicit `WARNING` in that situation so this isn't
+mistaken for "nothing was missing".
+
+If the structure has a deposited RCSB entry, pass its 4-character code with
+`--pdbid`: this fetches the deposited `SEQRES` from RCSB and uses it as the
+reference sequence for gap detection, while the atoms/coordinates being
+repaired still come entirely from your local file. Requires network access,
+and can take on the order of a minute for a large entry (PDBFixer fetches
+the full deposited structure to derive the sequence, not just a
+lightweight SEQRES query).
+
+```bash
+pypkatool fixstructure my_fragment.pdb --outdir results/ --pdbid 7A3S
+```
 
 ## Failure modes
 
