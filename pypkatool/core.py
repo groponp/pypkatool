@@ -1,43 +1,59 @@
 #!/usr/bin/env python3
 """pypkatool core module: PyPKA pKa results to CHARMM-GUI protonation states.
 
-This module drives `PyPKA <https://doi.org/10.1021/acs.jcim.0c00718>`_
-(Poisson-Boltzmann + Monte Carlo pKa calculation) on an input structure,
-cross-validates every predicted pKa against the independent machine-learning
-predictor `pKAI+ <https://doi.org/10.1021/acs.jctc.2c00308>`_, maps each
-titratable site's most probable tautomer onto a CHARMM36 residue/patch label
-(``HSD``/``HSE``/``HSP``, ``ASPP``, ``GLUP``, ``LSN``, ``CNEU``, ``CYSD``,
-``TYRD``, ``SERD``, ...), and writes a CHARMM-GUI-ready protonation table.
+This module drives PyPKA (Poisson-Boltzmann + Monte Carlo pKa calculation)
+on an input structure, cross-validates every predicted pKa against the
+independent machine-learning predictor pKAI+, maps each titratable site's
+most probable tautomer onto a CHARMM36 residue/patch label (``HSD``,
+``HSE``, ``HSP``, ``ASPP``, ``GLUP``, ``LSN``, ``CNEU``, ``CYSD``, ``TYRD``,
+``SERD``, ...), and writes a CHARMM-GUI-ready protonation table.
 
-**Tautomer reference-state convention.** "Reference" is PyPKA's own internal
-term for tautomer index ``N + 1`` (``titsite.py::getTautomers()`` docstring:
-"all tautomers instances except the tautomers of reference") - it is not a
-CHARMM or RTF concept; the bundled RTF never marks any RESI/PRES block as a
-"reference" of anything. ``_label()`` is what connects the two vocabularies,
-mapping the winning PyPKA tautomer index to a plain CHARMM label (verified
-against the installed PyPKA source, ``titsite.py::Titsite.getRefProtState()``,
-and against the signed atomic partial charges in the CHARMM36 ``.st``
-tautomer files):
+Notes
+-----
+**Tautomer reference-state convention.** "Reference" is PyPKA's own
+internal term for tautomer index ``N + 1`` (``titsite.py::getTautomers()``
+docstring: "all tautomers instances except the tautomers of reference") -
+it is not a CHARMM or RTF concept; the bundled RTF never marks any
+RESI/PRES block as a "reference" of anything. `_label` is what connects
+the two vocabularies, mapping the winning PyPKA tautomer index to a plain
+CHARMM label (verified against the installed PyPKA source,
+``titsite.py::Titsite.getRefProtState()``, and against the signed atomic
+partial charges in the CHARMM36 ``.st`` tautomer files):
 
-* Cationic sites (``HIS``, ``LYS``, ``NTR``) - the *reference* tautomer
+- Cationic sites (``HIS``, ``LYS``, ``NTR``) - the reference tautomer
   (index ``N + 1``, where ``N`` is the number of regular tautomers) is the
   **protonated**, positively charged state.
-* Anionic sites (``ASP``, ``GLU``, ``CTR``, ``CYS``, ``TYR``, ``SER``) - the
-  reference tautomer is the **deprotonated**, negatively charged state; the
-  regular tautomers (1..N) are the protonated, neutral forms (e.g. COOH for
-  ASP/GLU, SH for CYS, OH for TYR).
+- Anionic sites (``ASP``, ``GLU``, ``CTR``, ``CYS``, ``TYR``, ``SER``) -
+  the reference tautomer is the **deprotonated**, negatively charged
+  state; the regular tautomers (1..N) are the protonated, neutral forms
+  (e.g. COOH for ASP/GLU, SH for CYS, OH for TYR).
 
 This is the opposite assignment of what a naive reading of "reference =
-default" might suggest for anionic sites, and it is easy to get backwards -
-see :func:`_label` for the full mapping table.
+default" might suggest for anionic sites, and it is easy to get backwards
+- see `_label` for the full mapping table.
 
-Usage:
-    ``pypkatool run <pdb> --pH <float> [--outdir <dir>] [--ncpus N] [--epsin F]``
+Examples
+--------
+Command-line usage (see the ``run``/``reprocess``/``fixstructure``
+subcommands, wired up in `main`):
 
-    ``pypkatool reprocess <outdir> --pH <float> [--pdb <pdb>]``
+.. code-block:: console
 
-:seealso: PyPKA DOI 10.1021/acs.jcim.0c00718; pKAI/pKAI+ DOI
-    10.1021/acs.jctc.2c00308.
+    $ pypkatool run <pdb> --pH <float> [--outdir <dir>] [--ncpus N] [--epsin F]
+    $ pypkatool reprocess <outdir> --pH <float> [--pdb <pdb>]
+    $ pypkatool fixstructure (--pdb-file <pdb> | --pdb-id <code>) [--outdir <dir>]
+
+References
+----------
+.. [1] Reis, P. B. P. S.; Vila-Viçosa, D.; Rocchia, W.; Machuqueiro, M.
+   "PypKa: A Flexible Python Module for Poisson-Boltzmann-Based pKa
+   Calculations." *J. Chem. Inf. Model.* **2020**, *60* (10), 4442-4448.
+   https://doi.org/10.1021/acs.jcim.0c00718
+.. [2] Reis, P. B. P. S.; Bertolini, M.; Montanari, F.; Rocchia, W.;
+   Machuqueiro, M.; Clevert, D.-A. "A Fast and Interpretable Deep Learning
+   Approach for Accurate Electrostatics-Driven pKa Predictions in
+   Proteins." *J. Chem. Theory Comput.* **2022**, *18* (8), 5068-5078.
+   https://doi.org/10.1021/acs.jctc.2c00308
 """
 from __future__ import annotations
 
@@ -65,8 +81,10 @@ def _require_pkai() -> None:
     ``crossvalidation_report.dat``, so the dependency is enforced up front
     rather than failing deep inside a multi-minute PB+MC run.
 
-    :raises RuntimeError: if the ``pkai`` package cannot be found on
-        ``sys.path``.
+    Raises
+    ------
+    RuntimeError
+        If the ``pkai`` package cannot be found on `sys.path`.
     """
     import importlib.util
     if importlib.util.find_spec("pkai") is None:
@@ -89,24 +107,39 @@ RTF_PATH = Path(__file__).parent / "data" / "top_all36_prot.rtf"
 class RtfBlock:
     """One verbatim ``RESI`` or ``PRES`` block parsed from the CHARMM36 RTF.
 
-    :ivar kind: ``"RESI"`` for a full residue definition or ``"PRES"`` for a
-        patch.
-    :ivar name: Block name in upper case, e.g. ``"HSD"``, ``"ASPP"``.
-    :ivar charge: Net formal charge declared on the block's header line.
-    :ivar verbatim: The block's full original text, used both for display in
-        ``detail.json`` and for atom-presence checks elsewhere in this module.
+    Attributes
+    ----------
+    kind : str
+        ``"RESI"`` for a full residue definition or ``"PRES"`` for a patch.
+    name : str
+        Block name in upper case, e.g. ``"HSD"``, ``"ASPP"``.
+    charge : float
+        Net formal charge declared on the block's header line.
+    verbatim : str
+        The block's full original text, used both for display in
+        ``detail.json`` and for atom-presence checks elsewhere in this
+        module.
     """
     kind: str; name: str; charge: float; verbatim: str
 
 def _load_rtf(path: Path = RTF_PATH) -> dict[str, RtfBlock]:
     """Parse a CHARMM ``.rtf`` topology file into ``RESI``/``PRES`` blocks.
 
-    :param path: Path to the RTF file. Defaults to the bundled CHARMM36
-        protein topology (:data:`RTF_PATH`).
-    :type path: pathlib.Path
-    :returns: Mapping of upper-cased block name to :class:`RtfBlock`.
-    :rtype: dict[str, RtfBlock]
-    :raises FileNotFoundError: if ``path`` does not exist.
+    Parameters
+    ----------
+    path : pathlib.Path, default `RTF_PATH`
+        Path to the RTF file. Defaults to the bundled CHARMM36 protein
+        topology.
+
+    Returns
+    -------
+    dict of str to RtfBlock
+        Mapping of upper-cased block name to `RtfBlock`.
+
+    Raises
+    ------
+    FileNotFoundError
+        If `path` does not exist.
     """
     if not path.exists():
         raise FileNotFoundError(f"RTF not found: {path}")
@@ -123,23 +156,33 @@ def _load_rtf(path: Path = RTF_PATH) -> dict[str, RtfBlock]:
 def _rtf_has(name: str, rtf: dict) -> bool:
     """Return whether ``name`` has a RESI/PRES block in the parsed RTF.
 
-    :param name: CHARMM label to look up (case-insensitive).
-    :type name: str
-    :param rtf: RTF blocks as returned by :func:`_load_rtf`.
-    :type rtf: dict[str, RtfBlock]
-    :rtype: bool
+    Parameters
+    ----------
+    name : str
+        CHARMM label to look up (case-insensitive).
+    rtf : dict of str to RtfBlock
+        RTF blocks as returned by `_load_rtf`.
+
+    Returns
+    -------
+    bool
     """
     return name.upper() in rtf
 
 def _rtf_get(name: str, rtf: dict) -> RtfBlock | None:
     """Look up a single RTF block by label.
 
-    :param name: CHARMM label to look up (case-insensitive).
-    :type name: str
-    :param rtf: RTF blocks as returned by :func:`_load_rtf`.
-    :type rtf: dict[str, RtfBlock]
-    :returns: The matching block, or ``None`` if absent from the RTF.
-    :rtype: RtfBlock | None
+    Parameters
+    ----------
+    name : str
+        CHARMM label to look up (case-insensitive).
+    rtf : dict of str to RtfBlock
+        RTF blocks as returned by `_load_rtf`.
+
+    Returns
+    -------
+    RtfBlock or None
+        The matching block, or ``None`` if absent from the RTF.
     """
     return rtf.get(name.upper())
 
@@ -162,19 +205,37 @@ DEFAULT_PARAMS: dict[str, Any] = {
 class SiteResult:
     """One titratable site as returned by PyPKA, before CHARMM mapping.
 
-    :ivar resname: Residue name as reported by PyPKA (``"HIS"``, ``"ASP"``, ...).
-    :ivar resid: Residue number (icode-corrected string if applicable).
-    :ivar chain: Chain identifier, normalized to a single upper-case letter.
-    :ivar pka: Numeric pKa, or ``None`` if outside ``[0, 14)`` (see :func:`_fmt_pka`).
-    :ivar pka_str: Display string for ``pka`` (``"<0.0"``, ``">14.0"``, or ``"%.2f"``).
-    :ivar site_type: ``"c"`` (cationic) or ``"a"`` (anionic), from PyPKA ``getType()``.
-    :ivar most_prob_taut: 1-indexed most probable tautomer at the target pH;
-        equals ``n_regular_tautomers + 1`` when the *reference* tautomer wins.
-    :ivar n_regular_tautomers: Number of non-reference tautomers for this site.
-    :ivar populations: Named tautomer population fractions at the target pH,
-        for display only (see :func:`_build_pops`).
-    :ivar pct_protonated: Percent protonated at the target pH (see :func:`_charge_split`).
-    :ivar pct_deprotonated: Percent deprotonated at the target pH.
+    Attributes
+    ----------
+    resname : str
+        Residue name as reported by PyPKA (``"HIS"``, ``"ASP"``, ...).
+    resid : int or str
+        Residue number (icode-corrected string if applicable).
+    chain : str
+        Chain identifier, normalized to a single upper-case letter.
+    pka : float or None
+        Numeric pKa, or ``None`` if outside ``[0, 14)`` (see `_fmt_pka`).
+    pka_str : str
+        Display string for `pka` (``"<0.0"``, ``">14.0"``, or ``"%.2f"``).
+    site_type : str
+        ``"c"`` (cationic) or ``"a"`` (anionic), from PyPKA ``getType()``.
+    most_prob_taut : int
+        1-indexed most probable tautomer at the target pH; equals
+        ``n_regular_tautomers + 1`` when the reference tautomer wins.
+    n_regular_tautomers : int
+        Number of non-reference tautomers for this site.
+    populations : dict of str to float
+        Named tautomer population fractions at the target pH, for display
+        only (see `_build_pops`).
+    pct_protonated : float
+        Percent protonated at the target pH (see `_charge_split`).
+    pct_deprotonated : float
+        Percent deprotonated at the target pH.
+
+    See Also
+    --------
+    MappedResidue : The CHARMM-label-mapped form of this same site.
+    map_residue : Converts a `SiteResult` into a `MappedResidue`.
     """
     resname: str; resid: int | str; chain: str
     pka: float | None; pka_str: str; site_type: str
@@ -200,10 +261,29 @@ def _fmt_pka(v: Any) -> tuple[float | None, str]:
     that window has no defined pKa and is reported as always-deprotonated
     (< 0) or always-protonated (> 14).
 
-    :param v: Raw value from ``site.pK`` (may be ``None`` or non-numeric).
-    :type v: Any
-    :returns: ``(value, text)``; ``value`` is ``None`` when outside ``[0, 14)``.
-    :rtype: tuple[float | None, str]
+    Parameters
+    ----------
+    v : Any
+        Raw value from ``site.pK`` (may be ``None`` or non-numeric).
+
+    Returns
+    -------
+    value : float or None
+        ``None`` when outside ``[0, 14)``.
+    text : str
+        Display string: ``"<0.0"``, ``">14.0"``, ``"N/A"``, or ``"%.2f"``.
+
+    Warnings
+    --------
+    A site reported as ``"<0.0"`` (always deprotonated) and one reported as
+    ``">14.0"`` (always protonated) both collapse to ``value=None`` here -
+    callers that need to distinguish the two cannot do so from the return
+    value alone; they must inspect the original ``site.pK``/title string or
+    the titration curve directly. The fallback tautomer-index formula in
+    `run_pypka` (used only when PyPKA returns no titration curve for a
+    site) assumes ``value is None`` always means the ``">14.0"`` case,
+    which is backwards for a genuinely ``"<0.0"`` site if that fallback
+    path is ever exercised.
     """
     try:
         f = float(v)
@@ -216,19 +296,29 @@ def _fmt_pka(v: Any) -> tuple[float | None, str]:
 def _build_pops(resname: str, site_type: str, probs: list[float]) -> dict[str, float]:
     """Attach human-readable tautomer names to a raw probability vector.
 
-    Display-only helper (used by :func:`_taut_detail` and ``detail.json``);
-    it does not affect the CHARMM label decision, which is driven solely by
-    ``most_prob_taut`` in :func:`_label`.
+    Display-only helper (used by `_taut_detail` and ``detail.json``); it
+    does not affect the CHARMM label decision, which is driven solely by
+    ``most_prob_taut`` in `_label`.
 
-    :param resname: Residue name (``"HIS"``, ``"ASP"``, ...).
-    :type resname: str
-    :param site_type: ``"c"`` or ``"a"`` (unused directly, kept for symmetry
-        with :func:`_charge_split`).
-    :type site_type: str
-    :param probs: Tautomer probabilities, ``[regular_1..regular_N, reference]``.
-    :type probs: list[float]
-    :returns: Mapping of tautomer name to probability.
-    :rtype: dict[str, float]
+    Parameters
+    ----------
+    resname : str
+        Residue name (``"HIS"``, ``"ASP"``, ...).
+    site_type : str
+        ``"c"`` or ``"a"`` (unused directly, kept for symmetry with
+        `_charge_split`).
+    probs : list of float
+        Tautomer probabilities, ``[regular_1..regular_N, reference]``.
+
+    Returns
+    -------
+    dict of str to float
+        Mapping of tautomer name to probability.
+
+    See Also
+    --------
+    _charge_split : Reduces the same probability vector to a protonated
+        vs. deprotonated percentage instead of named populations.
     """
     r = resname.upper()
     names_map = {
@@ -247,15 +337,22 @@ def _charge_split(site_type: str, probs: list[float]) -> tuple[float, float]:
     """Split a tautomer probability vector into percent protonated/deprotonated.
 
     Uses the reference-tautomer convention documented at module level: for
-    cationic sites the reference slot (last element of ``probs``) is the
+    cationic sites the reference slot (last element of `probs`) is the
     protonated population; for anionic sites it is the deprotonated one.
 
-    :param site_type: ``"c"`` (cationic) or ``"a"`` (anionic).
-    :type site_type: str
-    :param probs: Tautomer probabilities, ``[regular_1..regular_N, reference]``.
-    :type probs: list[float]
-    :returns: ``(pct_protonated, pct_deprotonated)``, each in ``[0, 100]``.
-    :rtype: tuple[float, float]
+    Parameters
+    ----------
+    site_type : str
+        ``"c"`` (cationic) or ``"a"`` (anionic).
+    probs : list of float
+        Tautomer probabilities, ``[regular_1..regular_N, reference]``.
+
+    Returns
+    -------
+    pct_protonated : float
+        Percentage in ``[0, 100]``.
+    pct_deprotonated : float
+        Percentage in ``[0, 100]``.
     """
     if not probs: return 50.0, 50.0
     if site_type == "c":
@@ -263,28 +360,40 @@ def _charge_split(site_type: str, probs: list[float]) -> tuple[float, float]:
     return sum(probs[:-1])*100, probs[-1]*100
 
 def _hh_probs(site_type: str, pka: float | None, ph: float, n_reg: int) -> list[float]:
-    """Approximate tautomer populations from a scalar pKa via Henderson-Hasselbalch.
+    r"""Approximate tautomer populations from a scalar pKa via Henderson-Hasselbalch.
 
     Fallback used only when PyPKA's per-pH titration curve is unavailable
-    (see the ``ph_key is None`` branch in :func:`run_pypka`); the exact MC
-    populations from :func:`SiteResult.getTautsProb` are always preferred
-    when present. The protonated fraction ``fp = 1 / (1 + 10**(pH - pKa))``
-    is generic to any weak acid/base pair and independent of site polarity;
-    only its placement into the reference vs. regular slots differs by
-    ``site_type``.
+    (see the ``ph_key is None`` branch in `run_pypka`); the exact MC
+    populations from PyPKA's ``getTautsProb()`` are always preferred when
+    present.
 
-    :param site_type: ``"c"`` (cationic) or ``"a"`` (anionic).
-    :type site_type: str
-    :param pka: Site pKa, or ``None`` if outside ``[0, 14)`` - in that case a
-        uniform distribution is returned (protonation state is then decided
-        by the caller from the boundary, not from this vector).
-    :type pka: float | None
-    :param ph: Target pH.
-    :type ph: float
-    :param n_reg: Number of regular (non-reference) tautomers.
-    :type n_reg: int
-    :returns: Probability vector ``[regular_1..regular_N, reference]``.
-    :rtype: list[float]
+    Parameters
+    ----------
+    site_type : str
+        ``"c"`` (cationic) or ``"a"`` (anionic).
+    pka : float or None
+        Site pKa, or ``None`` if outside ``[0, 14)`` - in that case a
+        uniform distribution is returned (protonation state is then
+        decided by the caller from the boundary, not from this vector).
+    ph : float
+        Target pH.
+    n_reg : int
+        Number of regular (non-reference) tautomers.
+
+    Returns
+    -------
+    list of float
+        Probability vector ``[regular_1..regular_N, reference]``.
+
+    Notes
+    -----
+    The protonated fraction
+
+    .. math:: f_p = \frac{1}{1 + 10^{(\mathrm{pH} - \mathrm{pKa})}}
+
+    is generic to any weak acid/base pair and independent of site
+    polarity; only its placement into the reference vs. regular slots
+    differs by `site_type`.
     """
     total = n_reg + 1
     if pka is None: return [1.0/total]*total
@@ -312,10 +421,22 @@ def validate_pdb(pdb_path: Path) -> None:
     Non-fatal issues (insertion codes, non-standard residues) are printed as
     notes rather than raising, since PyPKA can often still process them.
 
-    :param pdb_path: Path to the input PDB file.
-    :type pdb_path: pathlib.Path
-    :raises SystemExit: on a missing/unreadable file, malformed ATOM/HETATM
+    Parameters
+    ----------
+    pdb_path : pathlib.Path
+        Path to the input PDB file.
+
+    Raises
+    ------
+    SystemExit
+        On a missing/unreadable file, malformed ``ATOM``/``HETATM``
         records, or a PDB with no recognizable standard protein residues.
+
+    See Also
+    --------
+    fix_structure : Repairs structural problems `validate_pdb` cannot
+        catch (missing atoms/residues), rather than just detecting
+        formatting problems.
     """
     if not pdb_path.exists():
         sys.exit(f"PDB not found: {pdb_path}")
@@ -379,15 +500,28 @@ def _inject_py27() -> None:
     """Put a Python 2.7 interpreter on ``PATH`` if one isn't already there.
 
     PyPKA's bundled ``pdbmender``/``pdb2pqr`` internally shells out to a
-    ``python2.7`` binary. If none is visible on ``PATH``, this looks for the
-    conda environment named ``py27`` (created via ``environment-py27.yml``,
-    see the project README) under the current user's home directory, or
-    ``$HOME``, and prepends its ``bin/`` to ``PATH`` for the current process.
-    Also checks ``/opt/conda/envs/py27`` (the container case: Apptainer
+    ``python2.7`` binary. If none is visible on ``PATH``, this looks for
+    the conda environment named ``py27`` (created via
+    ``environment-py27.yml``, see the project README) under the current
+    user's home directory, or ``$HOME``, and prepends its ``bin/`` to
+    ``PATH`` for the current process. A no-op if ``python2.7`` is already
+    resolvable.
+
+    Notes
+    -----
+    Also checks ``/opt/conda/envs/py27`` - the container case: Apptainer
     binds the host's real ``$HOME`` into the container by default, so a
-    container-internal env can't live under ``~/miniconda3`` - see
-    ``apptainer.def``, which installs conda at ``/opt/conda``). A no-op if
-    ``python2.7`` is already resolvable.
+    container-internal env can't live under ``~/miniconda3`` the way it
+    does on bare metal. ``apptainer.def`` installs conda at
+    ``/opt/conda`` specifically so this fallback resolves. Both bare-metal
+    and container paths are checked in the same call, in order, so this
+    function's behavior is identical whether or not it is running inside
+    a container.
+
+    See Also
+    --------
+    _find_pdbfixer_python : Same env-discovery pattern, for the separate
+        `fixstructure`-only ``pdbfixer`` environment.
     """
     import shutil
     if shutil.which("python2.7"): return
@@ -411,18 +545,29 @@ def _find_pdbfixer_python() -> str:
     """Locate the Python interpreter of a conda environment with pdbfixer installed.
 
     Looks for a conda environment named ``pdbfixer`` (see
-    ``environment-pdbfixer.yml`` / the project README "Repairing fragmented
-    structures") under common conda roots, including ``/opt/conda/envs/pdbfixer``
-    (the container case: Apptainer binds the host's real ``$HOME`` into the
-    container by default, so a container-internal env can't live under
-    ``~/miniconda3`` - see ``apptainer.def``, which installs conda at
-    ``/opt/conda``). pdbfixer/OpenMM require numpy>=2, which conflicts with
-    delphi4py's numpy<2 pin, so this always runs as a separate interpreter
-    rather than an in-process import.
+    ``environment-pdbfixer.yml`` / the project README "Repairing
+    fragmented structures") under common conda roots. pdbfixer/OpenMM
+    require numpy>=2, which conflicts with delphi4py's numpy<2 pin, so
+    this always runs as a separate interpreter rather than an in-process
+    import.
 
-    :returns: Path to the ``python`` executable inside the ``pdbfixer`` env.
-    :rtype: str
-    :raises SystemExit: if no such environment can be found.
+    Returns
+    -------
+    str
+        Path to the ``python`` executable inside the ``pdbfixer`` env.
+
+    Raises
+    ------
+    SystemExit
+        If no such environment can be found.
+
+    Notes
+    -----
+    Also checks ``/opt/conda/envs/pdbfixer`` - the container case:
+    Apptainer binds the host's real ``$HOME`` into the container by
+    default, so a container-internal env can't live under
+    ``~/miniconda3``. ``apptainer.def`` installs conda at ``/opt/conda``
+    specifically so this fallback resolves.
     """
     for d in [Path.home() / "miniconda3/envs/pdbfixer/bin",
               Path.home() / "anaconda3/envs/pdbfixer/bin",
@@ -441,58 +586,67 @@ def fix_structure(outdir: Path, pdb_file: Path | None = None, pdb_id: str | None
                    keep_hetatoms: bool = False) -> Path:
     """Repair a structurally incomplete PDB using PDBFixer, before feeding it to PyPKA.
 
-    Delegates to :data:`_FIXSTRUCTURE_WORKER`, run under
-    :func:`_find_pdbfixer_python`, which:
+    Delegates to `_FIXSTRUCTURE_WORKER`, run under `_find_pdbfixer_python`,
+    which fills in missing heavy atoms for every residue that is present
+    (including at chain termini, e.g. a missing ``OXT``), rebuilds missing
+    residues only when the gap is strictly internal to a chain, never adds
+    hydrogens, and by default drops every hetatom (waters, ions, ligands).
+    See Notes for the full policy and its rationale.
 
-    * fills in missing heavy atoms for every residue that is present
-      (including at chain termini, e.g. a missing ``OXT``);
-    * rebuilds missing residues only when the gap is strictly internal to a
-      chain (a present residue on both sides) - a gap at the very start or
-      end of a chain is left untouched, since that reflects where the
-      deposited construct actually starts/ends, not damage to repair;
-    * never adds hydrogens, so the output stays heavy-atom-only like a
-      standard deposited PDB;
-    * by default, drops every hetatom (waters, ions, ligands, and any
-      other non-polymer ``HETATM`` record) via PDBFixer's own
-      ``removeHeterogens(keepWater=False)``, keeping only the repaired
-      protein (and DNA/RNA, if present) - pass ``keep_hetatoms=True`` to
-      keep them instead, scoped to whatever ``select_chains`` kept (a
-      hetatom belonging to a dropped chain is already gone by the time
-      this runs, since chain selection happens first).
+    Parameters
+    ----------
+    outdir : pathlib.Path
+        Directory for the output file.
+    pdb_file : pathlib.Path, optional
+        Local PDB to repair as-is. Exactly one of `pdb_file`/`pdb_id`
+        must be given.
+    pdb_id : str, optional
+        4-character RCSB PDB code to download and repair instead of a
+        local file. Requires network access.
+    select_chains : list of str, optional
+        If given, keep only these chain IDs in the output (e.g.
+        ``["A", "B"]``); every other chain is dropped before repair.
+    keep_hetatoms : bool, default False
+        Keep waters/ions/ligands/other non-polymer ``HETATM`` records in
+        the output instead of dropping them.
 
-    Exactly one of ``pdb_file`` (repair a local file as-is) or ``pdb_id``
-    (download the structure directly from RCSB, which always carries the
-    official ``SEQRES``) must be given.
+    Returns
+    -------
+    pathlib.Path
+        Path to the repaired PDB (``<stem-or-pdb_id>_fixed.pdb``).
+
+    Raises
+    ------
+    SystemExit
+        If the ``pdbfixer`` environment is missing, or the worker
+        subprocess fails (e.g. no ``SEQRES``, or an unknown chain ID in
+        `select_chains`).
+
+    Notes
+    -----
+    Rebuilt internal gaps never extend a chain: a gap at the very start
+    or end of a chain is left untouched, since that reflects where the
+    deposited construct actually starts/ends, not damage to repair.
+    Dropped hetatoms are scoped to whatever `select_chains` kept - a
+    hetatom belonging to a dropped chain is already gone by the time the
+    hetatom-drop step runs, since chain selection happens first.
 
     Detecting internal gaps requires a reference sequence to compare the
     chain against (PDBFixer's ``findMissingResidues()``), and that
-    reference comes only from ``SEQRES`` records. Confirmed directly: on a
-    PDB with no ``SEQRES``, ``fixer.sequences`` is empty and
+    reference comes only from ``SEQRES`` records. Confirmed directly: on
+    a PDB with no ``SEQRES``, ``fixer.sequences`` is empty and
     ``findMissingResidues()`` returns ``{}`` regardless of how many
-    residues are actually missing - it would silently report "0 gaps" on a
-    file that may have real ones. Rather than let that pass silently, the
-    worker treats a missing reference sequence as a hard error and refuses
-    to write any output; use ``pdb_id`` instead of ``pdb_file`` for a
+    residues are actually missing - it would silently report "0 gaps" on
+    a file that may have real ones. Rather than let that pass silently,
+    the worker treats a missing reference sequence as a hard error and
+    refuses to write any output; use `pdb_id` instead of `pdb_file` for a
     structure whose local copy lacks ``SEQRES``.
 
-    :param outdir: Directory for the output file.
-    :type outdir: pathlib.Path
-    :param pdb_file: Local PDB to repair as-is.
-    :type pdb_file: pathlib.Path | None
-    :param pdb_id: 4-character RCSB PDB code to download and repair instead
-        of a local file. Requires network access.
-    :type pdb_id: str | None
-    :param select_chains: If given, keep only these chain IDs in the output
-        (e.g. ``["A", "B"]``); every other chain is dropped before repair.
-    :type select_chains: list[str] | None
-    :param keep_hetatoms: Keep waters/ions/ligands/other non-polymer
-        ``HETATM`` records in the output instead of dropping them.
-    :type keep_hetatoms: bool
-    :returns: Path to the repaired PDB (``<stem-or-pdb_id>_fixed.pdb``).
-    :rtype: pathlib.Path
-    :raises SystemExit: if the ``pdbfixer`` environment is missing, or the
-        worker subprocess fails (e.g. no ``SEQRES``, or an unknown chain ID
-        in ``select_chains``).
+    See Also
+    --------
+    run_pypka : Consumes the PDB this function produces.
+    validate_pdb : Lighter-weight formatting checks that do not repair
+        anything.
     """
     import subprocess
     outdir.mkdir(parents=True, exist_ok=True)
@@ -529,37 +683,70 @@ def run_pypka(pdb_path: Path, target_ph: float, outdir: Path,
     Writes PyPKA's raw output (protonated PDB, titration curve) under
     ``outdir/output_pypka/`` and a ``protocol.json`` capturing the exact
     parameters used, then reads back every titratable site's most probable
-    tautomer at ``target_ph`` via the PyPKA ``Titration`` API.
+    tautomer at `target_ph` via the PyPKA ``Titration`` API. Always runs
+    PyPKA with ``ffID="CHARMM36m"`` (see `DEFAULT_PARAMS`) - see Notes.
 
-    :param pdb_path: Input protein structure (PDB format).
-    :type pdb_path: pathlib.Path
-    :param target_ph: pH at which to evaluate the most probable protonation state.
-    :type target_ph: float
-    :param outdir: Output directory (created if missing).
-    :type outdir: pathlib.Path
-    :param ncpus: Number of CPUs for PyPKA's parallel PB solve. Defaults to 4.
-    :type ncpus: int
-    :param epsin: Protein interior dielectric constant. Defaults to 15
-        (PyPKA's literature-optimized value; RMSE 0.82 / MAE 0.57 on the
-        PKAD benchmark).
-    :type epsin: float
-    :param charmm_input: Set ``ffinput="CHARMM"`` (PyPKA/pdbmender default is
-        ``"GROMOS"``). Only matters if ``pdb_path`` already carries CHARMM
-        protonation-state-specific residue names (``HSD``/``HSE``/``HSP``/
-        ``ASPP``/``GLUP``/``CYSM``/...) - e.g. a PDB re-exported from a
-        CHARMM-GUI PDB Reader step. Verified against every call site that
-        reads ``ffinput`` (``pdbmender/utils.py::identify_tit_sites``,
-        ``pypka/clean/cleaning.py`` x2): all three only fire on those exact
-        residue names, via ``pdbmender.ffconverter.CHARMM_protomers``. A
-        standard PDB (RCSB, AlphaFold, ...) never contains them, so this flag
-        is a no-op for the common case - it exists for the CHARMM-GUI
-        round-trip case only. Defaults to ``False``.
-    :type charmm_input: bool
-    :returns: ``(sites, protonated_pdb_path)``.
-    :rtype: tuple[list[SiteResult], pathlib.Path]
-    :raises SystemExit: if the ``pypka`` package is not installed, or if
-        ``Titration()`` fails (most commonly a structurally incomplete PDB -
-        see the ``except Exception`` branch below).
+    Parameters
+    ----------
+    pdb_path : pathlib.Path
+        Input protein structure (PDB format).
+    target_ph : float
+        pH at which to evaluate the most probable protonation state.
+    outdir : pathlib.Path
+        Output directory (created if missing).
+    ncpus : int, default 4
+        Number of CPUs for PyPKA's parallel PB solve.
+    epsin : float, default 15
+        Protein interior dielectric constant (PyPKA's literature-optimized
+        value).
+    charmm_input : bool, default False
+        Set ``ffinput="CHARMM"`` (PyPKA/pdbmender default is
+        ``"GROMOS"``). Only matters if `pdb_path` already carries CHARMM
+        protonation-state-specific residue names (``HSD``, ``HSE``,
+        ``HSP``, ``ASPP``, ``GLUP``, ``CYSM``, ...) - e.g. a PDB
+        re-exported from a CHARMM-GUI PDB Reader step. A standard PDB
+        (RCSB, AlphaFold, ...) never contains them, so this flag is a
+        no-op for the common case.
+
+    Returns
+    -------
+    sites : list of SiteResult
+        One entry per titratable site PyPKA detected.
+    protonated_pdb_path : pathlib.Path
+        Path to PyPKA's output structure at `target_ph`.
+
+    Raises
+    ------
+    SystemExit
+        If the ``pypka`` package is not installed, or if ``Titration()``
+        fails - most commonly because `pdb_path` is structurally
+        incomplete (see the ``except Exception`` branch in the source,
+        and :doc:`/failure_modes`).
+
+    Notes
+    -----
+    ``ffID="CHARMM36m"`` is not optional and cannot be overridden from the
+    CLI: every label this pipeline produces is a CHARMM36 RESI/PRES name,
+    so the underlying pKa calculation has to be run with CHARMM36m
+    parameters for those labels to be physically consistent with the
+    electrostatics that produced them (PyPKA's own default is
+    ``ffID="G54A7"``/GROMOS). See this module's own References section
+    for the PypKa citation.
+
+    `charmm_input` was verified against every call site that reads
+    ``ffinput`` in the installed PyPKA/pdbmender source
+    (``pdbmender/utils.py::identify_tit_sites``, ``pypka/clean/cleaning.py``
+    x2): all three only fire on CHARMM-specific residue names, via
+    ``pdbmender.ffconverter.CHARMM_protomers`` - confirmed empirically too,
+    running with and without it produced bit-identical results across all
+    12 benchmark proteins.
+
+    See Also
+    --------
+    fix_structure : Repairs a structurally incomplete PDB before it
+        reaches this function, to avoid the `SystemExit` above.
+    reprocess_from_files : Rebuilds the same `SiteResult` list from a
+        previous run's raw output, without rerunning PyPKA.
     """
     try:
         from pypka import Titration
@@ -636,14 +823,24 @@ def run_pypka(pdb_path: Path, target_ph: float, outdir: Path,
 def _parse_titration_dat(p: Path):
     """Parse a PyPKA ``*_titration.dat`` file into per-site titration curves.
 
-    :param p: Path to the titration data file (``#pH <site>_<chain>_<resname> ...``
-        header followed by one row per pH step).
-    :type p: pathlib.Path
-    :returns: ``(sites, curves)`` where ``sites`` is a list of
-        ``(resid, chain, resname)`` tuples in column order and ``curves`` maps
-        each original column key to a list of ``(pH, fraction_protonated)``.
-    :rtype: tuple[list[tuple], dict[str, list[tuple[float, float]]]]
-    :raises ValueError: if the file has no ``#pH`` header line.
+    Parameters
+    ----------
+    p : pathlib.Path
+        Path to the titration data file (``#pH <site>_<chain>_<resname>
+        ...`` header followed by one row per pH step).
+
+    Returns
+    -------
+    sites : list of tuple
+        ``(resid, chain, resname)`` tuples, in column order.
+    curves : dict of str to list of tuple
+        Maps each original column key to a list of
+        ``(pH, fraction_protonated)`` samples.
+
+    Raises
+    ------
+    ValueError
+        If the file has no ``#pH`` header line.
     """
     lines = p.read_text().splitlines()
     col_keys, rows = [], []
@@ -671,11 +868,22 @@ def _parse_titration_dat(p: Path):
 def _pka_from_curve(curve) -> tuple[float|None, str]:
     """Recover a pKa by linear interpolation of a titration curve across 50%.
 
-    :param curve: List of ``(pH, fraction_protonated)`` samples, pH-ordered.
-    :type curve: list[tuple[float, float]]
-    :returns: ``(pka, display_string)`` at the first crossing of 0.5
-        protonation found; ``(None, "N/A")`` if the curve never crosses 0.5.
-    :rtype: tuple[float | None, str]
+    Parameters
+    ----------
+    curve : list of tuple of (float, float)
+        ``(pH, fraction_protonated)`` samples, pH-ordered.
+
+    Returns
+    -------
+    pka : float or None
+        ``None`` if the curve never crosses 0.5 protonation.
+    display_string : str
+        ``"N/A"`` when `pka` is ``None``, else a formatted value (see
+        `_fmt_pka`).
+
+    See Also
+    --------
+    _fmt_pka : Formats the numeric pKa found here into a display string.
     """
     for i in range(1, len(curve)):
         ph0, p0 = curve[i-1]; ph1, p1 = curve[i]
@@ -688,10 +896,15 @@ def _pka_from_curve(curve) -> tuple[float|None, str]:
 def _read_pdb_names(pdb: Path) -> dict[tuple[str,int|str], str]:
     """Read the first residue name seen per ``(chain, resid)`` from a PDB.
 
-    :param pdb: Path to a PDB file.
-    :type pdb: pathlib.Path
-    :returns: Mapping of ``(chain, resid)`` to residue name (upper case).
-    :rtype: dict[tuple[str, int | str], str]
+    Parameters
+    ----------
+    pdb : pathlib.Path
+        Path to a PDB file.
+
+    Returns
+    -------
+    dict of (str, int or str) to str
+        Mapping of ``(chain, resid)`` to residue name (upper case).
     """
     names: dict[tuple[str,int|str], str] = {}
     for line in pdb.read_text().splitlines():
@@ -705,6 +918,41 @@ def _read_pdb_names(pdb: Path) -> dict[tuple[str,int|str], str]:
 
 def reprocess_from_files(titration_dat: Path, protonated_pdb: Path,
                          target_ph: float) -> list[SiteResult]:
+    """Reconstruct `SiteResult` objects from a previous run's raw PyPKA output.
+
+    Used by the ``reprocess`` CLI command to regenerate reports (e.g. at a
+    different pH) without rerunning the expensive PB+MC step, since the
+    titration curve already covers the full pH 0-14 range.
+
+    Parameters
+    ----------
+    titration_dat : pathlib.Path
+        A previous run's ``*_titration.dat`` (see `_parse_titration_dat`).
+    protonated_pdb : pathlib.Path
+        The corresponding protonated PDB PyPKA wrote for that run.
+    target_ph : float
+        pH at which to evaluate the most probable protonation state.
+
+    Returns
+    -------
+    list of SiteResult
+        One entry per site found in `titration_dat`.
+
+    Notes
+    -----
+    Tautomer populations here are reconstructed from the exact
+    protonated-fraction at `target_ph` (interpolated from the curve) for
+    HIS, and from the same exact fraction (not the Henderson-Hasselbalch
+    approximation) for every other residue type - `_hh_probs` is called
+    first for its default distribution but immediately overwritten with
+    the exact fraction, matching the original PyPKA MC populations more
+    closely than a pure HH approximation would.
+
+    See Also
+    --------
+    run_pypka : The original PB+MC run this function's output approximates
+        without rerunning PyPKA.
+    """
     sites, curves = _parse_titration_dat(titration_dat)
     pdb_names = _read_pdb_names(protonated_pdb)
     col_keys = list(curves)
@@ -749,21 +997,42 @@ SKIP_TABLE = frozenset({"NTR","CTR"})  # terminal groups: included in JSON, excl
 class MappedResidue:
     """A titratable site after mapping to a CHARMM36 label.
 
-    :ivar resname: Original PyPKA residue name.
-    :ivar resid: Residue number.
-    :ivar chain: Chain identifier.
-    :ivar pka_str: Display pKa string, propagated from :class:`SiteResult`.
-    :ivar pct_protonated: Percent protonated at the target pH.
-    :ivar pct_deprotonated: Percent deprotonated at the target pH.
-    :ivar charmm_label: Resolved CHARMM36 RESI/PRES label (e.g. ``"HSE"``, ``"ASPP"``).
-    :ivar rtf_available: Whether ``charmm_label`` has a block in the bundled RTF.
-    :ivar is_tie: True when protonated/deprotonated percentages are within
-        :data:`TIE_MARGIN` of each other (ambiguous state).
-    :ivar tautomer_detail: Human-readable tautomer breakdown for display.
-    :ivar needs_action: Whether CHARMM-GUI needs a RESI change or PRES patch.
-    :ivar site_type: PyPKA site polarity (``"c"``/``"a"``), kept for cross-validation.
-    :ivar mpt: Most probable tautomer index, kept for cross-validation.
-    :ivar n_reg: Number of regular tautomers, kept for cross-validation.
+    Attributes
+    ----------
+    resname : str
+        Original PyPKA residue name.
+    resid : int or str
+        Residue number.
+    chain : str
+        Chain identifier.
+    pka_str : str
+        Display pKa string, propagated from `SiteResult`.
+    pct_protonated : float
+        Percent protonated at the target pH.
+    pct_deprotonated : float
+        Percent deprotonated at the target pH.
+    charmm_label : str
+        Resolved CHARMM36 RESI/PRES label (e.g. ``"HSE"``, ``"ASPP"``).
+    rtf_available : bool
+        Whether `charmm_label` has a block in the bundled RTF.
+    is_tie : bool
+        True when protonated/deprotonated percentages are within
+        `TIE_MARGIN` of each other (ambiguous state).
+    tautomer_detail : str
+        Human-readable tautomer breakdown for display.
+    needs_action : bool
+        Whether CHARMM-GUI needs a RESI change or PRES patch.
+    site_type : str
+        PyPKA site polarity (``"c"``/``"a"``), kept for cross-validation.
+    mpt : int
+        Most probable tautomer index, kept for cross-validation.
+    n_reg : int
+        Number of regular tautomers, kept for cross-validation.
+
+    See Also
+    --------
+    SiteResult : The pre-mapping form of this same site.
+    map_residue : Constructs a `MappedResidue` from a `SiteResult`.
     """
     resname: str; resid: int|str; chain: str; pka_str: str
     pct_protonated: float; pct_deprotonated: float
@@ -782,49 +1051,73 @@ TIE_MARGIN = 2.0
 def _label(resname: str, mpt: int, n_reg: int, site_type: str) -> str:
     """Map a PyPKA tautomer index to its CHARMM36 RESI/PRES label.
 
-    ``ref = (mpt == n_reg + 1)`` identifies the *reference* tautomer. Per the
-    module-level convention (verified against ``getRefProtState()`` in the
-    PyPKA source and the CHARMM36 ``.st`` tautomer charge sets):
+    Parameters
+    ----------
+    resname : str
+        Residue name (``"HIS"``, ``"ASP"``, ...).
+    mpt : int
+        Most probable tautomer index (1-indexed).
+    n_reg : int
+        Number of regular (non-reference) tautomers for this residue.
+    site_type : str
+        ``"c"`` (cationic) or ``"a"`` (anionic).
 
-    * Cationic (``site_type == "c"``): reference = protonated. For ``LYS``
-      that is the CHARMM *default* RESI - no patch needed. For ``NTR`` the
-      reference maps to ``NTER``, which - unlike ``LYS`` - is a ``PRES`` in
-      the RTF, not a ``RESI`` (a chain's N-terminus is always applied as a
-      patch on its first residue); it is, however, the default terminal
-      patch CHARMM-GUI's PDB Reader applies automatically, so no explicit
-      action is needed there either. Non-reference = neutral = needs a
-      patch (``LSN``, ``NNEU``).
-    * Anionic (``site_type == "a"``): reference = deprotonated. For
+    Returns
+    -------
+    str
+        CHARMM36 label, e.g. ``"HSE"``, ``"ASPP"``, ``"LSN"``.
+
+    Notes
+    -----
+    ``ref = (mpt == n_reg + 1)`` identifies the reference tautomer. Per
+    the module-level convention (verified against ``getRefProtState()``
+    in the PyPKA source and the CHARMM36 ``.st`` tautomer charge sets):
+
+    - Cationic (``site_type == "c"``): reference = protonated. For
+      ``LYS`` that is the CHARMM default RESI - no patch needed. For
+      ``NTR`` the reference maps to ``NTER``, which - unlike ``LYS`` - is
+      a ``PRES`` in the RTF, not a ``RESI`` (a chain's N-terminus is
+      always applied as a patch on its first residue); it is, however,
+      the default terminal patch CHARMM-GUI's PDB Reader applies
+      automatically, so no explicit action is needed there either.
+      Non-reference = neutral = needs a patch (``LSN``, ``NNEU``).
+    - Anionic (``site_type == "a"``): reference = deprotonated. For
       ``ASP``/``GLU`` the deprotonated, charged form *is* the CHARMM
       default RESI - no patch needed; the protonated form needs a patch
       (``ASPP``, ``GLUP``). For ``CTR`` the reference maps to ``CTER``,
       which - like ``NTER`` - is a ``PRES``, not a ``RESI``, but is the
       default C-terminal patch applied automatically. For
-      ``CYS``/``TYR``/``SER`` it is the opposite: the CHARMM default RESI is
-      the *protonated* neutral form (``CYS``, ``TYR``, ``SER``), so the
+      ``CYS``/``TYR``/``SER`` it is the opposite: the CHARMM default RESI
+      is the protonated neutral form (``CYS``, ``TYR``, ``SER``), so the
       deprotonated reference state is the one that needs a patch
       (``CYSD``, ``TYRD``, ``SERD``).
 
     ``HIS`` is special-cased on the raw tautomer index rather than the
-    reference flag: ``mpt == 1`` -> ``HSD`` (ND1-H), ``mpt == 2`` -> ``HSE``
-    (NE2-H), anything else (the reference, doubly-protonated state) -> ``HSP``.
+    reference flag: ``mpt == 1`` -> ``HSD`` (ND1-H), ``mpt == 2`` ->
+    ``HSE`` (NE2-H), anything else (the reference, doubly-protonated
+    state) -> ``HSP``.
 
     ``ARG`` is never titrated by PyPKA (pKa ~12.5, always protonated at
     biological pH) and never reaches this function. ``THR`` is titratable
     (``n_reg == 3``) but CHARMM36 has no ``PRES THRD``, so it is always
-    returned as plain ``"THR"`` regardless of ``ref``; callers surface a
-    warning instead (see :func:`reconcile_non_his_from_pdb`).
+    returned as plain ``"THR"`` regardless of `ref`; callers surface a
+    warning instead (see `reconcile_non_his_from_pdb`).
 
-    :param resname: Residue name (``"HIS"``, ``"ASP"``, ...).
-    :type resname: str
-    :param mpt: Most probable tautomer index (1-indexed).
-    :type mpt: int
-    :param n_reg: Number of regular (non-reference) tautomers for this residue.
-    :type n_reg: int
-    :param site_type: ``"c"`` (cationic) or ``"a"`` (anionic).
-    :type site_type: str
-    :returns: CHARMM36 label, e.g. ``"HSE"``, ``"ASPP"``, ``"LSN"``.
-    :rtype: str
+    See Also
+    --------
+    map_residue : Calls this function to build a `MappedResidue`.
+    reconcile_his_from_pdb : Overrides this function's HIS output using
+        the protonated PDB as an independent second check.
+    reconcile_non_his_from_pdb : Same, for every other residue type.
+
+    Examples
+    --------
+    >>> _label("HIS", mpt=2, n_reg=2, site_type="c")
+    'HSE'
+    >>> _label("ASP", mpt=5, n_reg=4, site_type="a")  # reference -> default RESI
+    'ASP'
+    >>> _label("ASP", mpt=1, n_reg=4, site_type="a")  # regular -> protonated patch
+    'ASPP'
     """
     r = resname.upper()
     ref = (mpt == n_reg+1)
@@ -842,21 +1135,26 @@ def _label(resname: str, mpt: int, n_reg: int, site_type: str) -> str:
 def _taut_detail(resname: str, pops: dict, pct_p: float, pct_d: float) -> str:
     """Format a short human-readable tautomer breakdown for display.
 
-    Display-only; does not influence :func:`_label`. For HIS, always shows
-    the HSP fraction plus the HSD/HSE split within the neutral population.
+    Display-only; does not influence `_label`. For HIS, always shows the
+    HSP fraction plus the HSD/HSE split within the neutral population.
     For ASP/GLU with a non-negligible protonated fraction, shows which
     carboxylate oxygen (OD1/OD2 or OE1/OE2) carries the proton.
 
-    :param resname: Residue name.
-    :type resname: str
-    :param pops: Named tautomer populations, as built by :func:`_build_pops`.
-    :type pops: dict[str, float]
-    :param pct_p: Percent protonated.
-    :type pct_p: float
-    :param pct_d: Percent deprotonated.
-    :type pct_d: float
-    :returns: A short descriptive string, or ``"-"`` if not applicable.
-    :rtype: str
+    Parameters
+    ----------
+    resname : str
+        Residue name.
+    pops : dict of str to float
+        Named tautomer populations, as built by `_build_pops`.
+    pct_p : float
+        Percent protonated.
+    pct_d : float
+        Percent deprotonated.
+
+    Returns
+    -------
+    str
+        A short descriptive string, or ``"-"`` if not applicable.
     """
     r = resname.upper()
     if r == "HIS":
@@ -878,18 +1176,29 @@ def _taut_detail(resname: str, pops: dict, pct_p: float, pct_d: float) -> str:
     return "-"
 
 def map_residue(site: SiteResult, rtf: dict) -> MappedResidue:
-    """Map one PyPKA :class:`SiteResult` to a :class:`MappedResidue`.
+    """Map one PyPKA `SiteResult` to a `MappedResidue`.
 
-    Applies :func:`_label` for the CHARMM label, checks RTF availability,
-    flags ties, and (for HIS) always requires CHARMM-GUI action since a RESI
+    Applies `_label` for the CHARMM label, checks RTF availability, flags
+    ties, and (for HIS) always requires CHARMM-GUI action since a RESI
     choice (HSD/HSE/HSP) must be made explicitly regardless of pKa.
 
-    :param site: Raw PyPKA site result.
-    :type site: SiteResult
-    :param rtf: Parsed CHARMM36 RTF blocks, as returned by :func:`_load_rtf`.
-    :type rtf: dict[str, RtfBlock]
-    :returns: The mapped residue, prior to PDB-based reconciliation.
-    :rtype: MappedResidue
+    Parameters
+    ----------
+    site : SiteResult
+        Raw PyPKA site result.
+    rtf : dict of str to RtfBlock
+        Parsed CHARMM36 RTF blocks, as returned by `_load_rtf`.
+
+    Returns
+    -------
+    MappedResidue
+        The mapped residue, prior to PDB-based reconciliation.
+
+    See Also
+    --------
+    reconcile_his_from_pdb : Corrects this function's HIS output using
+        the protonated PDB.
+    reconcile_non_his_from_pdb : Same, for other residue types.
     """
     lbl = _label(site.resname, site.most_prob_taut, site.n_regular_tautomers, site.site_type)
     tie = abs(site.pct_protonated - site.pct_deprotonated) <= TIE_MARGIN
@@ -924,16 +1233,24 @@ _HIS_RTF_EXPECTED = {lbl: p["required"] for lbl, p in _RESI_H_PROFILE.items()}
 def _his_rtf_h_atoms(rtf: dict) -> dict[str, frozenset[str]]:
     """Parse imidazole H atoms (HD1 / HE2) from HSD / HSE / HSP RESI blocks in the RTF.
 
-    Standard CHARMM36 result:
-        HSD → frozenset({"HD1"})   proton on ND1
-        HSE → frozenset({"HE2"})   proton on NE2
-        HSP → frozenset({"HD1","HE2"})  both nitrogens protonated
+    Parameters
+    ----------
+    rtf : dict of str to RtfBlock
+        Parsed CHARMM36 RTF blocks, as returned by `_load_rtf`.
 
-    :param rtf: Parsed CHARMM36 RTF blocks, as returned by :func:`_load_rtf`.
-    :type rtf: dict[str, RtfBlock]
-    :returns: Mapping of ``"HSD"``/``"HSE"``/``"HSP"`` to their required
+    Returns
+    -------
+    dict of str to frozenset of str
+        Mapping of ``"HSD"``/``"HSE"``/``"HSP"`` to their required
         imidazole hydrogen names per the RTF.
-    :rtype: dict[str, frozenset[str]]
+
+    Notes
+    -----
+    Standard CHARMM36 result::
+
+        HSD -> frozenset({"HD1"})          proton on ND1
+        HSE -> frozenset({"HE2"})          proton on NE2
+        HSP -> frozenset({"HD1", "HE2"})   both nitrogens protonated
     """
     out: dict[str, frozenset[str]] = {}
     for lbl in ("HSD", "HSE", "HSP"):
@@ -952,21 +1269,38 @@ def _his_rtf_h_atoms(rtf: dict) -> dict[str, frozenset[str]]:
 
 
 def _his_pdb_signals(prot_pdb: Path) -> dict[tuple[str, int], tuple[str, str]]:
-    """Read protonated PDB → {(chain, resid): (label_from_name, label_from_atoms)}.
+    """Read protonated PDB into two independent per-residue HIS label signals.
 
-    label_from_name : residue name field (HSD / HSE / HSP / HIS / unknown)
-    label_from_atoms: inferred from which imidazole N has a hydrogen:
-                        HD1 present + HE2 absent  → HSD
-                        HE2 present + HD1 absent  → HSE
-                        HD1 + HE2 both present    → HSP
-                        neither present           → UNKNOWN
-    Both signals must agree; if they disagree the atom-based label is used
-    (atoms are ground truth - the name field could be a PyPKA formatting bug).
+    Parameters
+    ----------
+    prot_pdb : pathlib.Path
+        PyPKA's output protonated PDB.
 
-    :param prot_pdb: PyPKA's output protonated PDB.
-    :type prot_pdb: pathlib.Path
-    :returns: Mapping of ``(chain, resid)`` to ``(label_from_name, label_from_atoms)``.
-    :rtype: dict[tuple[str, int], tuple[str, str]]
+    Returns
+    -------
+    dict of (str, int) to (str, str)
+        Mapping of ``(chain, resid)`` to ``(label_from_name,
+        label_from_atoms)``.
+
+    Notes
+    -----
+    ``label_from_name`` is the residue name field (``HSD``/``HSE``/``HSP``/
+    ``HIS``/unknown). ``label_from_atoms`` is inferred from which
+    imidazole nitrogen carries a hydrogen::
+
+        HD1 present, HE2 absent  -> HSD
+        HE2 present, HD1 absent  -> HSE
+        HD1 + HE2 both present   -> HSP
+        neither present           -> UNKNOWN
+
+    Both signals must agree; if they disagree, `reconcile_his_from_pdb`
+    uses the atom-based label (atoms are ground truth - the name field
+    could be a PyPKA formatting quirk).
+
+    See Also
+    --------
+    reconcile_his_from_pdb : Consumes this function's output as one of
+        its three cross-checked signals.
     """
     name_first: dict[tuple[str,int], str] = {}
     atom_set:   dict[tuple[str,int], set[str]] = {}
@@ -1009,30 +1343,43 @@ def reconcile_his_from_pdb(mapped: list[MappedResidue], prot_pdb: Path,
                             rtf: dict) -> list[MappedResidue]:
     """Override HIS labels using three independent signals.
 
-    Signal 1 - residue name field in protonated PDB (set by PyPKA's formatter).
+    Parameters
+    ----------
+    mapped : list of MappedResidue
+        Residues already mapped by `map_residue`.
+    prot_pdb : pathlib.Path
+        PyPKA's output protonated PDB (ground truth for atoms).
+    rtf : dict of str to RtfBlock
+        Parsed CHARMM36 RTF blocks.
 
-    Signal 2 - atom inventory: which imidazole N carries H::
+    Returns
+    -------
+    list of MappedResidue
+        `mapped` with every HIS entry's `charmm_label` reconciled against
+        the protonated PDB; non-HIS entries are passed through unchanged.
 
-        HD1 present, HE2 absent  -> HSD
-        HE2 present, HD1 absent  -> HSE
-        HD1 + HE2 both present   -> HSP
-        neither                  -> UNKNOWN
+    Notes
+    -----
+    Three independent signals are checked, in decision priority order:
 
-    Signal 3 - CHARMM36 RTF ATOM definitions for each HIS label: HSD defines
-    HD1 only; HSE defines HE2 only; HSP defines both.
+    1. Atom inventory - which imidazole nitrogen carries a hydrogen (see
+       `_his_pdb_signals`). Highest priority: atoms are ground truth.
+    2. Residue name field in the protonated PDB, as written by PyPKA's
+       formatter.
+    3. CHARMM36 RTF ``ATOM`` definitions for each HIS label (``HSD``
+       defines ``HD1`` only, ``HSE`` defines ``HE2`` only, ``HSP`` defines
+       both) - used to validate the final label against the topology; a
+       mismatch is printed as an ``RTF ERROR``, not silently ignored.
 
-    Decision priority: atoms (2) > name (1) > API-derived label.
-    RTF (3) validates the final label against the topology; mismatch → ERROR.
+    If signal 1 (atoms) and signal 2 (name) disagree, the atom-based
+    label wins and a warning is printed, since the name field could
+    reflect a PyPKA formatting inconsistency rather than the true state.
 
-    :param mapped: Residues already mapped by :func:`map_residue`.
-    :type mapped: list[MappedResidue]
-    :param prot_pdb: PyPKA's output protonated PDB (ground truth for atoms).
-    :type prot_pdb: pathlib.Path
-    :param rtf: Parsed CHARMM36 RTF blocks.
-    :type rtf: dict[str, RtfBlock]
-    :returns: ``mapped`` with every HIS entry's ``charmm_label`` reconciled
-        against the protonated PDB; non-HIS entries are passed through unchanged.
-    :rtype: list[MappedResidue]
+    See Also
+    --------
+    map_residue : Produces the API-derived label this function overrides.
+    reconcile_non_his_from_pdb : The equivalent PDB-authority correction
+        for every non-HIS titratable residue type.
     """
     signals = _his_pdb_signals(prot_pdb)
     rtf_h   = _his_rtf_h_atoms(rtf)
@@ -1151,12 +1498,18 @@ _PATCH_H_INDICATORS: dict[str, tuple[str, str]] = {
 def _validate_patches(rtf: dict) -> None:
     """One-time RTF patch verification: each CHARMM non-HIS patch defines the expected H.
 
-    Prints RTF WARNING if a patch is missing or lacks its expected H indicator atom.
-    Called once per run from _post(); silent when everything is correct.
+    Prints ``RTF WARNING`` if a patch is missing or lacks its expected H
+    indicator atom. Called once per run from `_post`; silent when
+    everything is correct.
 
-    :param rtf: Parsed CHARMM36 RTF blocks.
-    :type rtf: dict[str, RtfBlock]
-    :rtype: None
+    Parameters
+    ----------
+    rtf : dict of str to RtfBlock
+        Parsed CHARMM36 RTF blocks.
+
+    Returns
+    -------
+    None
     """
     for label, (action, h_atom) in _PATCH_H_INDICATORS.items():
         blk = _rtf_get(label, rtf)
@@ -1180,46 +1533,62 @@ def _validate_patches(rtf: dict) -> None:
 
 
 def _lys_tyr_cys_pdb_signals(prot_pdb: Path) -> dict[tuple[str, str, int], str]:
-    """Read protonated PDB → state inferred from atom inventory for LYS, TYR, CYS, SER.
+    """Read protonated PDB atom inventory for ASP, GLU, LYS, TYR, CYS, SER, THR.
 
-    RTF-derived atom indicators (RTF is the AUTHORITY for what each state looks like):
-        LYS  : 3 HZ atoms → "LYS" (protonated, all HZ1/HZ2/HZ3 present)
-               2 HZ atoms → "LSN" (PRES LSN deletes HZ3; neutral amine)
-               other      → "UNKNOWN"
-        TYR  : HH present → "TYR" (phenol OH intact)
-               HH absent  → "TYRD" (phenol deprotonated; pKa ~10, rare at physiol. pH)
-        CYS  : HG1 present → "CYS" (thiol SH intact)
-               HG1 absent  → "CYSD" (PRES CYSD deletes HG1; thiolate; excludes SS-bonds)
-        SER  : HG1 present → "SER" (hydroxyl OH intact)
-               HG1 absent  → "SERD" (PRES SERD deletes HG1; pKa ~13–14, very rare)
+    Parameters
+    ----------
+    prot_pdb : pathlib.Path
+        PyPKA's output protonated PDB.
 
-    ASP  : HD2 present → "ASPP" (protonated ASP; PyPKA writes HD2 in the protonated PDB)
-           HD2 absent  → "ASP" (deprotonated default)
-    GLU  : HE2 present → "GLUP" (protonated GLU; PyPKA writes HE2 in the protonated PDB)
-           HE2 absent  → "GLU" (deprotonated default)
+    Returns
+    -------
+    dict of (str, str, int) to str
+        Mapping of ``(resname, chain, resid)`` to the inferred state
+        label.
 
-    Note: PyPKA starts from the fully-protonated model (HD11/HD12/HD21/HD22 for ASP,
-    HE11/HE12/HE21/HE22 for GLU) and removes tautomer-specific H atoms via CHARMM_protomers,
-    renaming the remaining one to HD2 (ASP) or HE2 (GLU) via ffconverter atom-name maps.
-    The residue name stays "ASP"/"GLU" (not "ASPP"/"GLUP") in the protonated PDB;
-    the H atom presence is the signal.
+    Notes
+    -----
+    RTF-derived atom indicators - the RTF is the authority for what each
+    state looks like:
 
-    Additional CYS variants handled:
-        CYX  : SS-bonded cysteine (PyPKA writes CYX, no HG1 by disulfide geometry)
-               → returns "CYX" (not a pKa-driven deprotonation; skip warning)
-        CYM  : Anionic cysteine in AMBER nomenclature / RESI CYM in CHARMM36 RTF
-               → maps to "CYSD" (equivalent deprotonated state)
-        CYSN : PyPKA internal CHARMM tautomer name for protonated CYS
-               → maps to "CYS"
+    - **ASP**: ``HD2`` present -> ``"ASPP"`` (protonated; PyPKA writes
+      ``HD2`` in the protonated PDB); absent -> ``"ASP"`` (deprotonated
+      default).
+    - **GLU**: ``HE2`` present -> ``"GLUP"``; absent -> ``"GLU"``. Same
+      pattern as ASP.
+    - **LYS**: 3 ``HZ`` atoms -> ``"LYS"`` (protonated, all
+      HZ1/HZ2/HZ3 present); 2 -> ``"LSN"`` (``PRES LSN`` deletes HZ3,
+      neutral amine); otherwise -> ``"UNKNOWN"``.
+    - **TYR**: ``HH`` present -> ``"TYR"`` (phenol OH intact); absent ->
+      ``"TYRD"`` (phenol deprotonated; pKa ~10, rare at physiological pH).
+    - **CYS**/**CYN**: ``HG1`` present -> ``"CYS"`` (thiol SH intact);
+      absent -> ``"CYSD"`` (``PRES CYSD`` deletes HG1; thiolate; excludes
+      SS-bonded cysteines).
+    - **CYX**: SS-bonded cysteine (PyPKA writes ``CYX``, no HG1 by
+      disulfide geometry) -> ``"CYX"`` (not a pKa-driven deprotonation,
+      exempted from the CYS warning path).
+    - **CYM**: anionic cysteine in AMBER nomenclature / RESI ``CYM`` in
+      the CHARMM36 RTF -> mapped to ``"CYSD"`` (equivalent deprotonated
+      state; the pipeline uses the ``CYSD`` patch approach, not the
+      standalone ``CYM`` residue, for CHARMM-GUI).
+    - **SER**: ``HG1`` present -> ``"SER"``; absent -> ``"SERD"`` (``PRES
+      SERD`` deletes HG1; pKa ~13-14, very rare).
+    - **THR**: RTF ``THR`` has ``HG1`` (hydroxyl H on OG1); no ``PRES
+      THRD`` exists in CHARMM36, so a deprotonated THR (pKa ~14, very
+      rare) is reported as ``"THR_nohg1"`` rather than a real label.
 
-    Note: RTF has both RESI CYM (anionic CYS standalone residue) and PRES CYSD (patch).
-    Our pipeline uses CYSD (patch approach for CHARMM-GUI). CYM in an input PDB
-    (from AMBER or manual editing) is treated as the same deprotonated state.
+    PyPKA starts from the fully-protonated model (``HD11``/``HD12``/
+    ``HD21``/``HD22`` for ASP, ``HE11``/``HE12``/``HE21``/``HE22`` for
+    GLU) and removes tautomer-specific H atoms via ``CHARMM_protomers``,
+    renaming the remaining one to ``HD2`` (ASP) or ``HE2`` (GLU) via
+    ``ffconverter`` atom-name maps. The residue name stays ``"ASP"``/
+    ``"GLU"`` (not ``"ASPP"``/``"GLUP"``) in the protonated PDB - the H
+    atom presence is the only signal.
 
-    :param prot_pdb: PyPKA's output protonated PDB.
-    :type prot_pdb: pathlib.Path
-    :returns: Mapping of ``(resname, chain, resid)`` to the inferred state label.
-    :rtype: dict[tuple[str, str, int], str]
+    See Also
+    --------
+    reconcile_non_his_from_pdb : Consumes this function's output as the
+        PDB-authority signal for non-HIS label correction.
     """
     atom_sets: dict[tuple[str, str, int], set[str]] = {}
     for line in prot_pdb.read_text().splitlines():
@@ -1266,32 +1635,45 @@ def reconcile_non_his_from_pdb(mapped: list[MappedResidue], prot_pdb: Path,
                                rtf: dict) -> list[MappedResidue]:
     """Correct non-HIS labels using the protonated PDB atom inventory as authority.
 
-    For each non-HIS titratable residue, the PDB written by PyPKA is the ground truth.
-    If the assigned label disagrees with the PDB, the label is CORRECTED (not just warned),
-    preventing wrong outputs in the reprocess path where mpt is reconstructed from a 50%
-    cutoff and may differ from the original PyPKA MC result.
+    Parameters
+    ----------
+    mapped : list of MappedResidue
+        Residues already mapped by `map_residue` (and, if HIS is present,
+        already passed through `reconcile_his_from_pdb`).
+    prot_pdb : pathlib.Path
+        PyPKA's output protonated PDB (ground truth for atoms).
+    rtf : dict of str to RtfBlock
+        Parsed CHARMM36 RTF blocks.
 
-    Signals used per type:
-      ASP : HD2 present → ASPP (protonated); absent → ASP (default)
-      GLU : HE2 present → GLUP (protonated); absent → GLU (default)
-      LYS : HZ≥3 → LYS (default); HZ=2 → LSN (neutral)
-      TYR : HH present → TYR (default); absent → TYRD (deprotonated, no RTF patch)
-      CYS : HG1 present → CYS (default); absent → CYSD
-      SER : HG1 present → SER (default); absent → SERD
-      THR : HG1 absent → warn only (PRES THRD absent from CHARMM36 RTF)
-      CYX : skip (SS-bonded, not a pKa-driven state)
-      CYM : treated as CYSD (anionic CYS in AMBER naming)
+    Returns
+    -------
+    list of MappedResidue
+        `mapped` with non-HIS titratable labels corrected to match the
+        protonated PDB's atom inventory where they disagree.
 
-    :param mapped: Residues already mapped by :func:`map_residue` (and, if
-        HIS is present, already passed through :func:`reconcile_his_from_pdb`).
-    :type mapped: list[MappedResidue]
-    :param prot_pdb: PyPKA's output protonated PDB (ground truth for atoms).
-    :type prot_pdb: pathlib.Path
-    :param rtf: Parsed CHARMM36 RTF blocks.
-    :type rtf: dict[str, RtfBlock]
-    :returns: ``mapped`` with non-HIS titratable labels corrected to match
-        the protonated PDB's atom inventory where they disagree.
-    :rtype: list[MappedResidue]
+    Notes
+    -----
+    For each non-HIS titratable residue, the PDB written by PyPKA is the
+    ground truth. If the assigned label disagrees with the PDB, the label
+    is *corrected* (not just flagged with a warning), preventing wrong
+    outputs on the ``reprocess`` path, where the most-probable-tautomer
+    index is reconstructed from a 50% cutoff and may differ from the
+    original PyPKA MC result.
+
+    Signals used per residue type (see `_lys_tyr_cys_pdb_signals` for the
+    full atom-presence rules):
+
+    - ASP/GLU/LYS/TYR/CYS/SER: corrected to the PDB-derived label.
+    - THR: warn only - CHARMM36 has no ``PRES THRD``, so there is no
+      valid corrected label to apply.
+    - CYX: skipped (SS-bonded, not a pKa-driven state).
+    - CYM: treated as ``CYSD`` (anionic CYS in AMBER naming).
+
+    See Also
+    --------
+    reconcile_his_from_pdb : The equivalent PDB-authority correction for
+        HIS specifically, using a 3-signal check instead of a single
+        atom-inventory lookup.
     """
     pdb_states = _lys_tyr_cys_pdb_signals(prot_pdb)
     result: list[MappedResidue] = []
@@ -1343,29 +1725,49 @@ def reconcile_non_his_from_pdb(mapped: list[MappedResidue], prot_pdb: Path,
 
 
 def _validate_label_chain(mapped: list[MappedResidue], rtf: dict) -> None:
-    """Cross-check each action residue through: PyPKA source → _label() → RTF.
+    """Cross-check each action residue through: PyPKA source -> `_label` -> RTF.
 
+    Parameters
+    ----------
+    mapped : list of MappedResidue
+        Fully reconciled residues (post HIS and non-HIS reconciliation).
+    rtf : dict of str to RtfBlock
+        Parsed CHARMM36 RTF blocks.
+
+    Returns
+    -------
+    None
+        Prints nothing when everything is consistent (the normal case);
+        diagnostic lines otherwise.
+
+    Notes
+    -----
     For every titratable site, validates three things in sequence:
 
-    1. RTF availability: the label must have a RESI or PRES entry in CHARMM36 RTF.
-       If not, CHARMM-GUI cannot apply the action (flagged as NO_PATCH in the table).
-    2. Patch indicator consistency: for PRES patches (ASPP, GLUP, LSN, CYSD, SERD), confirm
-       the patch atom indicator (_PATCH_H_INDICATORS) is coherent with the RTF block.
-    3. pct direction: ADD-patch labels require pct_protonated≥50%; DELETE-patch labels
-       require pct_deprotonated≥50%. TIE cases are exempt.
+    1. RTF availability - the label must have a RESI or PRES entry in
+       CHARMM36 RTF. If not, CHARMM-GUI cannot apply the action (flagged
+       as ``NO_PATCH`` in the table).
+    2. Patch indicator consistency - for PRES patches (``ASPP``, ``GLUP``,
+       ``LSN``, ``CYSD``, ``SERD``), confirms the patch atom indicator
+       (`_PATCH_H_INDICATORS`) is coherent with the RTF block.
+    3. Percentage direction - ``ADD``-patch labels require
+       ``pct_protonated >= 50%``; ``DELETE``-patch labels require
+       ``pct_deprotonated >= 50%``. TIE cases are exempt.
 
-    Note: mpt-vs-label source check is NOT done here for non-HIS because
-    reconcile_non_his_from_pdb() already ran and may have corrected the label to match the
-    PDB (which is authoritative). Checking mpt vs corrected-label would fire false alarms.
+    The tautomer-index-vs-label source check is intentionally *not* done
+    here for non-HIS residues, because `reconcile_non_his_from_pdb`
+    already ran and may have corrected the label to match the PDB (which
+    is authoritative) - checking the tautomer index against a
+    PDB-corrected label would fire false alarms.
 
-    HIS is excluded - it is handled by reconcile_his_from_pdb() (3-signal).
-    Prints nothing when everything is consistent (normal case).
+    HIS is excluded entirely - it is handled by `reconcile_his_from_pdb`'s
+    own 3-signal check instead.
 
-    :param mapped: Fully reconciled residues (post HIS and non-HIS reconciliation).
-    :type mapped: list[MappedResidue]
-    :param rtf: Parsed CHARMM36 RTF blocks.
-    :type rtf: dict[str, RtfBlock]
-    :rtype: None
+    See Also
+    --------
+    reconcile_his_from_pdb : The equivalent validation for HIS.
+    reconcile_non_his_from_pdb : Runs before this function and may have
+        already corrected the labels being validated here.
     """
     for r in mapped:
         if not r.needs_action or r.resname.upper() in SKIP_TABLE:
@@ -1418,11 +1820,30 @@ def _validate_label_chain(mapped: list[MappedResidue], rtf: dict) -> None:
 class CVRow:
     """One PyPKA-vs-pKAI+ cross-validation comparison row for a titratable site.
 
-    :ivar sign_agree: True if both methods place the site on the same side
-        of 50% protonation at the target pH.
-    :ivar near_ph: True if the PyPKA pKa is within 2 pH units of the target
-        pH (used to compute the "near" agreement statistic, where cross-
-        validation is most meaningful).
+    Attributes
+    ----------
+    resname : str
+        Residue name (CHARMM label, e.g. ``"ASP"``, ``"HSD"``).
+    resid : int or str
+        Residue number.
+    chain : str
+        Chain identifier.
+    pka_pypka : str
+        PyPKA-predicted pKa, formatted as returned by :func:`_fmt_pka`.
+    pct_pypka : float
+        PyPKA-predicted percent protonated at the target pH.
+    pka_pkai : str
+        pKAI+-predicted pKa, formatted to two decimal places.
+    pct_pkai : float
+        pKAI+-derived percent protonated at the target pH (Henderson-
+        Hasselbalch, computed from ``pka_pkai``).
+    sign_agree : bool
+        True if both methods place the site on the same side of 50%
+        protonation at the target pH.
+    near_ph : bool
+        True if the PyPKA pKa is within 2 pH units of the target pH (used
+        to compute the "near" agreement statistic, where cross-validation
+        is most meaningful).
     """
     resname:str; resid:int|str; chain:str
     pka_pypka:str; pct_pypka:float
@@ -1436,13 +1857,30 @@ def run_pkai(pdb_path: Path) -> list[dict]:
     by inserting the ``pkai`` package directory at the front of ``sys.path``
     before importing ``pkai.pKAI``.
 
-    :param pdb_path: Path to a PDB file (any protonation state; pKAI infers
-        the local heavy-atom environment, not existing H positions).
-    :type pdb_path: pathlib.Path
-    :returns: One dict per titratable residue: ``{"chain", "resid",
-        "resname", "pka"}``.
-    :rtype: list[dict]
-    :raises RuntimeError: if the ``pkai`` package is not installed.
+    Parameters
+    ----------
+    pdb_path : pathlib.Path
+        Path to a PDB file (any protonation state; pKAI infers the local
+        heavy-atom environment, not existing H positions).
+
+    Returns
+    -------
+    list of dict
+        One dict per titratable residue: ``{"chain", "resid", "resname",
+        "pka"}``.
+
+    Raises
+    ------
+    RuntimeError
+        If the ``pkai`` package is not installed.
+
+    References
+    ----------
+    Reis, P. B. P. S.; Bertolini, M.; Montanari, F.; Rocchia, W.;
+    Machuqueiro, M.; Clevert, D.-A. "A Fast and Interpretable Deep Learning
+    Approach for Accurate Electrostatics-Driven pKa Predictions in
+    Proteins." *J. Chem. Theory Comput.* 2022, 18, 5068-5078.
+    `DOI: 10.1021/acs.jctc.2c00308 <https://doi.org/10.1021/acs.jctc.2c00308>`_
     """
     import importlib.util
     spec = importlib.util.find_spec("pkai")
@@ -1462,15 +1900,26 @@ def run_pkai(pdb_path: Path) -> list[dict]:
 def compare_cv(mapped: list[MappedResidue], pkai: list[dict], ph: float) -> list[CVRow]:
     """Join PyPKA-derived and pKAI+-derived pKa predictions per site.
 
-    :param mapped: Fully reconciled residues from the PyPKA pipeline.
-    :type mapped: list[MappedResidue]
-    :param pkai: Raw pKAI+ predictions, as returned by :func:`run_pkai`.
-    :type pkai: list[dict]
-    :param ph: Target pH.
-    :type ph: float
-    :returns: One :class:`CVRow` per site present in both PyPKA and pKAI+
-        output (sites reported by only one method are silently dropped).
-    :rtype: list[CVRow]
+    Parameters
+    ----------
+    mapped : list of MappedResidue
+        Fully reconciled residues from the PyPKA pipeline.
+    pkai : list of dict
+        Raw pKAI+ predictions, as returned by :func:`run_pkai`.
+    ph : float
+        Target pH.
+
+    Returns
+    -------
+    list of CVRow
+        One :class:`CVRow` per site present in both PyPKA and pKAI+ output.
+
+    Notes
+    -----
+    Sites reported by only one method (e.g. a residue pKAI+ doesn't
+    consider titratable, or one PyPKA drops for a structural reason) are
+    silently dropped from the comparison rather than reported as a
+    mismatch.
     """
     idx = {}
     for rec in pkai:
@@ -1494,14 +1943,19 @@ def compare_cv(mapped: list[MappedResidue], pkai: list[dict], ph: float) -> list
 def write_cv_report(rows: list[CVRow], outdir: Path, ph: float) -> Path:
     """Write ``crossvalidation_report.dat`` summarizing PyPKA vs. pKAI+ agreement.
 
-    :param rows: Comparison rows, as returned by :func:`compare_cv`.
-    :type rows: list[CVRow]
-    :param outdir: Output directory.
-    :type outdir: pathlib.Path
-    :param ph: Target pH (for the report header).
-    :type ph: float
-    :returns: Path to the written report.
-    :rtype: pathlib.Path
+    Parameters
+    ----------
+    rows : list of CVRow
+        Comparison rows, as returned by :func:`compare_cv`.
+    outdir : pathlib.Path
+        Output directory.
+    ph : float
+        Target pH (for the report header).
+
+    Returns
+    -------
+    pathlib.Path
+        Path to the written report.
     """
     near = [r for r in rows if r.near_ph]
     a_all = sum(1 for r in rows if r.sign_agree)
@@ -1545,12 +1999,17 @@ _COL = (f"{'RESNAME':<8} {'RESID':>6} {'CHAIN':>6}  {'PKA_PYPKA':>10}  "
 def _action(r: MappedResidue) -> str:
     """Classify the CHARMM-GUI action needed for one mapped residue.
 
-    :param r: A fully reconciled residue.
-    :type r: MappedResidue
-    :returns: ``"TIE"`` (ambiguous), ``"NO_PATCH"`` (label has no RTF entry),
-        ``"RESI"`` (HIS: pick the residue name in PDB Reader), or ``"PATCH"``
-        (apply a PRES patch in the Patches panel).
-    :rtype: str
+    Parameters
+    ----------
+    r : MappedResidue
+        A fully reconciled residue.
+
+    Returns
+    -------
+    str
+        ``"TIE"`` (ambiguous), ``"NO_PATCH"`` (label has no RTF entry),
+        ``"RESI"`` (HIS: pick the residue name in PDB Reader), or
+        ``"PATCH"`` (apply a PRES patch in the Patches panel).
     """
     if r.is_tie: return "TIE"
     if not r.rtf_available: return "NO_PATCH"
@@ -1566,22 +2025,27 @@ def write_dat(mapped: list[MappedResidue], outdir: Path, protein: str,
     residues are omitted to keep the table short. Full detail for every
     titratable site is in ``protonation_inputs.json``/``detail.json``.
 
-    :param mapped: Fully reconciled residues.
-    :type mapped: list[MappedResidue]
-    :param outdir: Output directory.
-    :type outdir: pathlib.Path
-    :param protein: Protein name/stem, used in the header.
-    :type protein: str
-    :param ph: Target pH.
-    :type ph: float
-    :param pdb_path: Input PDB path, used in the header.
-    :type pdb_path: pathlib.Path
-    :param params: Run parameters (``epsin``, ``ionicstr``, ...).
-    :type params: dict
-    :param pkai_map: ``(chain, resid, resname) -> pKAI+ pKa`` lookup.
-    :type pkai_map: dict
-    :returns: Path to the written file.
-    :rtype: pathlib.Path
+    Parameters
+    ----------
+    mapped : list of MappedResidue
+        Fully reconciled residues.
+    outdir : pathlib.Path
+        Output directory.
+    protein : str
+        Protein name/stem, used in the header.
+    ph : float
+        Target pH.
+    pdb_path : pathlib.Path
+        Input PDB path, used in the header.
+    params : dict
+        Run parameters (``epsin``, ``ionicstr``, ...).
+    pkai_map : dict
+        ``(chain, resid, resname) -> pKAI+ pKa`` lookup.
+
+    Returns
+    -------
+    pathlib.Path
+        Path to the written file.
     """
     date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     epsin = params.get("epsin", 15)
@@ -1609,22 +2073,28 @@ def write_json(mapped: list[MappedResidue], outdir: Path, protein: str,
     Unlike :func:`write_dat`, this includes every titratable site
     (including default-state and terminal residues), for downstream scripting.
 
-    :param mapped: Fully reconciled residues.
-    :type mapped: list[MappedResidue]
-    :param outdir: Output directory.
-    :type outdir: pathlib.Path
-    :param protein: Protein name/stem.
-    :type protein: str
-    :param ph: Target pH.
-    :type ph: float
-    :param pdb_path: Input PDB path.
-    :type pdb_path: pathlib.Path
-    :param params: Run parameters (``epsin``, ``ionicstr``, ...).
-    :type params: dict
-    :param pypka_ver: Installed PyPKA version string, for provenance.
-    :type pypka_ver: str
-    :returns: Path to the written file.
-    :rtype: pathlib.Path
+    Parameters
+    ----------
+    mapped : list of MappedResidue
+        Fully reconciled residues.
+    outdir : pathlib.Path
+        Output directory.
+    protein : str
+        Protein name/stem.
+    ph : float
+        Target pH.
+    pdb_path : pathlib.Path
+        Input PDB path.
+    params : dict
+        Run parameters (``epsin``, ``ionicstr``, ...).
+    pypka_ver : str, optional
+        Installed PyPKA version string, for provenance. Default is
+        ``"unknown"``.
+
+    Returns
+    -------
+    pathlib.Path
+        Path to the written file.
     """
     dest = outdir / "protonation_inputs.json"
     data = {
@@ -1648,12 +2118,17 @@ def write_json(mapped: list[MappedResidue], outdir: Path, protein: str,
 def write_detail_json(mapped: list[MappedResidue], outdir: Path) -> Path:
     """Write ``detail.json``: per-site tautomer breakdowns and RTF blocks used.
 
-    :param mapped: Fully reconciled residues.
-    :type mapped: list[MappedResidue]
-    :param outdir: Output directory.
-    :type outdir: pathlib.Path
-    :returns: Path to the written file.
-    :rtype: pathlib.Path
+    Parameters
+    ----------
+    mapped : list of MappedResidue
+        Fully reconciled residues.
+    outdir : pathlib.Path
+        Output directory.
+
+    Returns
+    -------
+    pathlib.Path
+        Path to the written file.
     """
     rtf = _load_rtf()
     rtf_blocks: dict[str, str] = {}
@@ -1677,15 +2152,20 @@ def _save_pypka_out(sites: list[SiteResult], outdir: Path, ph: float,
                     pkai_map: dict) -> None:
     """Save a raw pKa-per-residue table (PyPKA + pKAI+ columns) to ``output_pypka/pka.out``.
 
-    :param sites: Raw (pre-mapping) PyPKA site results.
-    :type sites: list[SiteResult]
-    :param outdir: Output directory.
-    :type outdir: pathlib.Path
-    :param ph: Target pH (for the header).
-    :type ph: float
-    :param pkai_map: ``(chain, resid, resname) -> pKAI+ pKa`` lookup.
-    :type pkai_map: dict
-    :rtype: None
+    Parameters
+    ----------
+    sites : list of SiteResult
+        Raw (pre-mapping) PyPKA site results.
+    outdir : pathlib.Path
+        Output directory.
+    ph : float
+        Target pH (for the header).
+    pkai_map : dict
+        ``(chain, resid, resname) -> pKAI+ pKa`` lookup.
+
+    Returns
+    -------
+    None
     """
     out = outdir / "output_pypka"
     out.mkdir(exist_ok=True)
@@ -1712,15 +2192,20 @@ def _save_protocol(params: dict, pdb_path: Path, ph: float, outdir: Path) -> Non
     Written before PyPKA is invoked (from :func:`run_pypka`), so it also
     serves as a record of run intent if PyPKA crashes mid-execution.
 
-    :param params: Run parameters passed to ``pypka.Titration``.
-    :type params: dict
-    :param pdb_path: Input PDB path.
-    :type pdb_path: pathlib.Path
-    :param ph: Target pH.
-    :type ph: float
-    :param outdir: Output directory.
-    :type outdir: pathlib.Path
-    :rtype: None
+    Parameters
+    ----------
+    params : dict
+        Run parameters passed to ``pypka.Titration``.
+    pdb_path : pathlib.Path
+        Input PDB path.
+    ph : float
+        Target pH.
+    outdir : pathlib.Path
+        Output directory.
+
+    Returns
+    -------
+    None
     """
     try: pypka_ver = importlib.metadata.version("pypka")
     except Exception: pypka_ver = "unknown"
@@ -1745,22 +2230,31 @@ def _post(mapped_raw: list[SiteResult], prot_pdb: Path, pdb_path: Path,
     truth, and only then do the validation and report-writing steps run
     against the final, reconciled labels.
 
-    :param mapped_raw: Raw PyPKA site results (:func:`run_pypka` or
+    Parameters
+    ----------
+    mapped_raw : list of SiteResult
+        Raw PyPKA site results (:func:`run_pypka` or
         :func:`reprocess_from_files`).
-    :type mapped_raw: list[SiteResult]
-    :param prot_pdb: PyPKA's protonated output PDB.
-    :type prot_pdb: pathlib.Path
-    :param pdb_path: Original input PDB (used for pKAI+ cross-validation).
-    :type pdb_path: pathlib.Path
-    :param outdir: Output directory.
-    :type outdir: pathlib.Path
-    :param ph: Target pH.
-    :type ph: float
-    :param params: Run parameters, propagated into ``protonation_inputs.dat``'s header.
-    :type params: dict
-    :raises FileNotFoundError: if ``pdb_path`` does not exist (pKAI+
-        cross-validation is mandatory and needs the original PDB).
-    :rtype: None
+    prot_pdb : pathlib.Path
+        PyPKA's protonated output PDB.
+    pdb_path : pathlib.Path
+        Original input PDB (used for pKAI+ cross-validation).
+    outdir : pathlib.Path
+        Output directory.
+    ph : float
+        Target pH.
+    params : dict
+        Run parameters, propagated into ``protonation_inputs.dat``'s header.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    FileNotFoundError
+        If ``pdb_path`` does not exist (pKAI+ cross-validation is
+        mandatory and needs the original PDB).
     """
     rtf = _load_rtf()
     mapped = [map_residue(s, rtf) for s in mapped_raw]
@@ -1811,9 +2305,15 @@ def _post(mapped_raw: list[SiteResult], prot_pdb: Path, pdb_path: Path,
 def cmd_run(args: argparse.Namespace) -> None:
     """Entry point for ``pypkatool run``: full PyPKA + mapping + reports pipeline.
 
-    :param args: Parsed CLI arguments (``pdb``, ``pH``, ``outdir``, ``ncpus``, ``epsin``).
-    :type args: argparse.Namespace
-    :rtype: None
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Parsed CLI arguments (``pdb``, ``pH``, ``outdir``, ``ncpus``,
+        ``epsin``, ``charmm_input``).
+
+    Returns
+    -------
+    None
     """
     pdb_path = Path(args.pdb).resolve()
     print("\n[0/2] Validating PDB...")
@@ -1856,10 +2356,19 @@ def cmd_reprocess(args: argparse.Namespace) -> None:
     but a later stage failed, or to regenerate reports at a different pH
     without rerunning PyPKA (the titration curve already covers pH 0-14).
 
-    :param args: Parsed CLI arguments (``outdir``, ``pH``, ``pdb``, ``epsin``).
-    :type args: argparse.Namespace
-    :raises SystemExit: if ``outdir`` or its expected PyPKA output files are missing.
-    :rtype: None
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Parsed CLI arguments (``outdir``, ``pH``, ``pdb``, ``epsin``).
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    SystemExit
+        If ``outdir`` or its expected PyPKA output files are missing.
     """
     outdir = Path(args.outdir).resolve()
     if not outdir.exists(): sys.exit(f"ERROR: outdir not found: {outdir}")
@@ -1895,10 +2404,15 @@ def cmd_reprocess(args: argparse.Namespace) -> None:
 def cmd_fixstructure(args: argparse.Namespace) -> None:
     """Entry point for ``pypkatool fixstructure``: repair a PDB with PDBFixer.
 
-    :param args: Parsed CLI arguments (``pdb_file``, ``pdb_id``, ``outdir``,
+    Parameters
+    ----------
+    args : argparse.Namespace
+        Parsed CLI arguments (``pdb_file``, ``pdb_id``, ``outdir``,
         ``select_chains``, ``keep_hetatoms``).
-    :type args: argparse.Namespace
-    :rtype: None
+
+    Returns
+    -------
+    None
     """
     pdb_file = Path(args.pdb_file).resolve() if args.pdb_file else None
     outdir = Path(args.outdir) if args.outdir else (pdb_file.parent if pdb_file else Path.cwd())
@@ -1913,11 +2427,14 @@ def cmd_fixstructure(args: argparse.Namespace) -> None:
 def main() -> None:
     """CLI entry point (console script ``pypkatool``).
 
-    Defines the ``run`` and ``reprocess`` subcommands and dispatches to
-    :func:`cmd_run` / :func:`cmd_reprocess`. Prints help and returns if no
-    subcommand is given.
+    Defines the ``run``, ``reprocess``, and ``fixstructure`` subcommands and
+    dispatches to :func:`cmd_run` / :func:`cmd_reprocess` /
+    :func:`cmd_fixstructure`. Prints help and returns if no subcommand is
+    given.
 
-    :rtype: None
+    Returns
+    -------
+    None
     """
     p = argparse.ArgumentParser(prog="pypkatool",
         description="PyPKA pKa → CHARMM-GUI protonation state pipeline")

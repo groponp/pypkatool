@@ -52,6 +52,47 @@ from openmm.app import PDBFile
 
 def fix(pdb_out: str, pdb_file: str | None = None, pdb_id: str | None = None,
         select_chains: list[str] | None = None, keep_hetatoms: bool = False) -> dict:
+    """Repair one structure with PDBFixer and write the result to ``pdb_out``.
+
+    Exactly one of `pdb_file`/`pdb_id` must be given (enforced by the
+    mutually exclusive CLI group in :func:`main`, not by this function
+    itself). See the module docstring for the full repair policy (which
+    gaps get rebuilt, why a missing SEQRES is a hard error, hetatom
+    handling, and why no hydrogens are added).
+
+    Parameters
+    ----------
+    pdb_out : str
+        Path to write the repaired PDB to.
+    pdb_file : str, optional
+        Local PDB file to repair as-is.
+    pdb_id : str, optional
+        4-character RCSB PDB code to download and repair instead of a
+        local file.
+    select_chains : list of str, optional
+        Chain IDs to keep; every other chain is removed before repair.
+        If None, all chains are kept.
+    keep_hetatoms : bool, optional
+        If True, keep waters/ions/ligands/other non-polymer ``HETATM``
+        records (scoped to whatever `select_chains` kept). If False
+        (default), drop them via ``removeHeterogens(keepWater=False)``.
+
+    Returns
+    -------
+    dict
+        Summary with keys ``internal_residues_added``,
+        ``residues_with_missing_atoms_filled``, ``hetatoms_removed``, and
+        ``terminal_gaps_left_untouched`` (a ``{"chain_<id>_pos_<index>":
+        [residue names]}`` map of terminal gaps intentionally left
+        unrepaired).
+
+    Raises
+    ------
+    SystemExit
+        If `select_chains` requests a chain not present in the structure,
+        or if the structure has no ``SEQRES``-derived reference sequence
+        (internal gaps cannot be reliably detected without one).
+    """
     fixer = PDBFixer(filename=pdb_file) if pdb_file else PDBFixer(pdbid=pdb_id)
 
     if select_chains:
@@ -118,6 +159,17 @@ def fix(pdb_out: str, pdb_file: str | None = None, pdb_id: str | None = None,
 
 
 def main() -> None:
+    """Parse CLI arguments, run :func:`fix`, and print its summary as JSON.
+
+    Invoked as a subprocess by ``pypkatool.core.fix_structure()`` in the
+    separate ``pdbfixer`` conda environment (see
+    ``pypkatool/core.py::_find_pdbfixer_python``); not intended to be run
+    interactively.
+
+    Returns
+    -------
+    None
+    """
     p = argparse.ArgumentParser()
     src = p.add_mutually_exclusive_group(required=True)
     src.add_argument("--pdb-file", default=None)

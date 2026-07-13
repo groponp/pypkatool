@@ -22,9 +22,21 @@ release = "1.0.0"
 extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",  # parses NumPy/Google-style docstrings for autodoc
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.mathjax",   # renders ".. math::" blocks in NumPy-style Notes
 ]
+
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+napoleon_use_param = True
+napoleon_use_rtype = False
+# napoleon renders a dataclass's "Attributes" section as :ivar: field-list
+# entries instead of separate py:attribute:: directives - without this,
+# autodoc's own per-field member listing for @dataclass classes collides
+# with napoleon's generated Attributes list ("duplicate object description").
+napoleon_use_ivar = True
 
 myst_enable_extensions = ["colon_fence", "deflist"]
 source_suffix = {".md": "markdown", ".rst": "restructuredtext"}
