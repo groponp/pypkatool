@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pypkatool"
-version = "1.0.9"
+version = "1.1.0"
 description = "PyPKA pKa results to CHARMM-GUI protonation states, cross-validated against pKAI+"
 readme = "README.md"
 requires-python = ">=3.10,<3.11"

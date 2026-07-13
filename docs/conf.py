@@ -17,7 +17,7 @@ sys.path.insert(0, str(DOCS_DIR / "_stubs"))       # stub `pkai` package for _re
 project = "pypkatool"
 copyright = "2026, Ropón-Palacios G."
 author = "Ropón-Palacios G."
-release = "1.0.9"
+release = "1.1.0"
 
 extensions = [
     "myst_parser",

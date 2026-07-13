@@ -9,8 +9,8 @@ message: >-
   the protonation-state topology.
 type: software
 title: pypkatool
-version: 1.0.9
-date-released: 2026-07-12
+version: 1.1.0
+date-released: 2026-07-13
 authors:
   - family-names: Ropón-Palacios
     given-names: G.
